@@ -9,6 +9,8 @@ use linfa::dataset::Dataset;
 extern crate ndarray;
 use ndarray::Ix1;
 
+use rand::prelude::*;
+
 use sefar::sequential_algos::eo;
 use sefar::sequential_algos::eo::*;
 use sefar::core::genome::*;
@@ -22,12 +24,14 @@ pub struct Evonet<'a> {
     pub activations: &'a Vec<Activations>,
 	pub layers: &'a Vec<usize>,
     neuralnetwork : Neuralnet,
+    learning_set : Option<Dataset<f64, f64, Ix1>>,
+    testing_set :  Option<Dataset<f64, f64, Ix1>>,
 }
 
 impl<'a> Evonet<'a> {
 
     #[allow(dead_code)]
-    pub fn new (layers: &'a Vec<usize>, activations :&'a Vec<Activations>, dataset : &'a Dataset<f64, f64, Ix1>, k_fold : Option<usize>)-> Result<Evonet<'a>, String>{
+    pub fn new(layers: &'a Vec<usize>, activations :&'a Vec<Activations>, dataset : &'a Dataset<f64, f64, Ix1>, k_fold : Option<usize>, shuffle: bool, split_ratio : f32)-> Result<Evonet<'a>, String>{
         
         if layers.len() < 2 {
           return Err("Layers must be greater than 1.".to_owned());
@@ -37,7 +41,17 @@ impl<'a> Evonet<'a> {
             return Err("Lenghts of Activations and Layers must be equals.".to_owned());
         }
 
+        let tmp_dataset = dataset.clone();
+         //shuffl and split data 
+         if shuffle {
+            let mut rng = rand::thread_rng();
+            tmp_dataset.shuffle(&mut rng);
+        }
+
+        let (training_set, testing_set) = tmp_dataset.split_with_ratio(split_ratio);
+                
         let nnet : Neuralnet = Neuralnet::new(layers.clone(), activations.clone());
+        
         Ok (Evonet {
            // max_iter : iterations,
             dataset,
@@ -45,7 +59,13 @@ impl<'a> Evonet<'a> {
             activations,
             layers,
             neuralnetwork: nnet,
+            learning_set : Some(training_set),
+            testing_set : Some(testing_set),
         })
+    }
+
+    pub fn get_weights_biases_count(&self)->usize{
+        self.neuralnetwork.get_weights_biases_count()
     }
 
     ///
@@ -67,7 +87,8 @@ impl<'a> Evonet<'a> {
             a2 : params.a2,
             gp : params.gp,
         };
-                
+
+                     
         let result  = sefar::sequential_algos::eo::eo(&newparams, self);
         result
     }
@@ -79,7 +100,8 @@ impl<'a> Evonet<'a> {
         
         let mut i : usize = 0;
         for itm in ds.iter() {
-            result[i][0] = itm.clone();    
+            result[i][0] = itm.clone();
+            i+=1;    
         };
                 
         result
@@ -89,35 +111,26 @@ impl<'a> Evonet<'a> {
 impl<'a> Objectivefunction for Evonet<'a>{
     fn evaluate(&mut self, genome : &Vec<f64>)->f64 {
                          
-        let kf : usize = match self.k_fold {
-                None =>  1,
-                Some(kf) =>  kf,
-         };
+        //let kf : usize = match self.k_fold {
+        //        None =>  1,
+        //        Some(kf) =>  kf,
+        // };
          
-        let kfolds = self.dataset.fold(kf);
-        
-        for onefold in kfolds.iter() {
-            
-            //1. Update weights and biases :
-            self.neuralnetwork.update_weights_biases(genome);
-            
-            // for rd in onefold.0 {
-            //     println!(" record : {}", rd);
-            // }
-            
-            
-            
-            //2. Compute RMSE 
-            //let rmse = self.neuralnetwork.compute_learning_error_rmse(
-            //                &onefold.0.records,
-            //                &onefold.0.targets.to_vec());        
-            
-            
-            
-        }      
-        
-        
-        0.0f64   
+        //let kfolds = self.dataset.fold(kf);  
+
+         //1. Update weights and biases :
+         self.neuralnetwork.update_weights_biases(genome);
+          
+         let learning_err = match &self.learning_set {
+             None => f64::NAN,
+             Some(train_set)=>{
+                
+                
+                0.0f64
+             }, 
+         }; 
+               
+         learning_err 
     }
     
    
