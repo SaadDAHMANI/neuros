@@ -1,4 +1,4 @@
-extern crate neuros
+extern crate neuros;
 
 
 fn main() {
