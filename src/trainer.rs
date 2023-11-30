@@ -25,6 +25,8 @@ pub struct Evonet<'a> {
 }
 
 impl<'a> Evonet<'a> {
+
+    #[allow(dead_code)]
     pub fn new (layers: &'a Vec<usize>, activations :&'a Vec<Activations>, dataset : &'a Dataset<f64, f64, Ix1>, k_fold : Option<usize>)-> Result<Evonet<'a>, String>{
         
         if layers.len() < 2 {
@@ -32,7 +34,7 @@ impl<'a> Evonet<'a> {
         }
 
         if activations.len() != layers.len() {
-            return Err("lenghts of Activations and Layers must be equals.".to_owned());
+            return Err("Lenghts of Activations and Layers must be equals.".to_owned());
         }
 
         let nnet : Neuralnet = Neuralnet::new(layers.clone(), activations.clone());
@@ -46,6 +48,10 @@ impl<'a> Evonet<'a> {
         })
     }
 
+    ///
+    /// perform supervised learning.
+    ///     
+    #[allow(dead_code)]
     pub fn do_learning(&mut self, params : &EOparams) -> OptimizationResult {
         let wb = self.neuralnetwork.get_weights_biases_count();
         let lb = vec![-5.0; wb]; //Vec::new();
@@ -66,9 +72,10 @@ impl<'a> Evonet<'a> {
         result
     }
     
+    #[allow(dead_code)]
      fn convert22dvec(ds : &Vec<f64>)->Vec<Vec<f64>>{
         
-        let result = vec![vec![0.0f64; 1]; ds.len()];
+        let mut result = vec![vec![0.0f64; 1]; ds.len()];
         
         let mut i : usize = 0;
         for itm in ds.iter() {
@@ -81,7 +88,7 @@ impl<'a> Evonet<'a> {
   
 impl<'a> Objectivefunction for Evonet<'a>{
     fn evaluate(&mut self, genome : &Vec<f64>)->f64 {
-        //         
+                         
         let kf : usize = match self.k_fold {
                 None =>  1,
                 Some(kf) =>  kf,
@@ -89,14 +96,15 @@ impl<'a> Objectivefunction for Evonet<'a>{
          
         let kfolds = self.dataset.fold(kf);
         
-        for onefold in kfolds {
+        for onefold in kfolds.iter() {
             
             //1. Update weights and biases :
             self.neuralnetwork.update_weights_biases(genome);
             
-            // for rd in onefold.0.records{
-                
-            //}
+            // for rd in onefold.0 {
+            //     println!(" record : {}", rd);
+            // }
+            
             
             
             //2. Compute RMSE 
