@@ -1,6 +1,14 @@
 {
     "rust-analyzer.linkedProjects": [
         "./bin/Cargo.toml",
-        "./Cargo.toml"
-    ]
+        "./Cargo.toml",
+        "./src/bin/Cargo.toml",
+        "./src/bin/Cargo.toml",
+        "./src/bin/Cargo.toml",
+        "./src/bin/Cargo.toml",
+        "./src/bin/Cargo.toml",
+        "./src/bin/Cargo.toml",
+        "./src/bin/Cargo.toml"
+    ],
+    "rust-analyzer.showUnlinkedFileNotification": false
 }
