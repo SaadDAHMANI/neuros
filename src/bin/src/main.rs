@@ -17,7 +17,11 @@ fn main() {
     let dataset : Dataset<f64, f64, Ix1> = Dataset::new(records, targets);
 
     let k_fold : Option<usize> = Some(2);
+
+    // shuffle the dataset
     let shuffle : bool = true;
+
+    //split the dataset into (70% learning, 30% testing) 
     let split_ratio : f32 = 0.7;
 
     let mut ann_restult = Evonet::new(&layers, &activations, &dataset, k_fold, shuffle, split_ratio);
