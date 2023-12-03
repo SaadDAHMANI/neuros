@@ -132,15 +132,25 @@ impl<'a> Objectivefunction for Evonet<'a>{
          let learning_err = match &self.learning_set {
              None => f64::NAN,
              Some(train_set)=>{
-                
-                
-                0.0f64
+
+                for (x, y) in train_set.sample_iter(){
+                    match x.as_slice() {
+                        None=>{},
+                        Some(vector)=> {
+                            let computed =  self.neuralnetwork.feed_forward(vector);
+                        },
+                    }
+                      };
+
+                0.0
              }, 
          }; 
                
          learning_err 
     }
     
+
+
    
 
 }

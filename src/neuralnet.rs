@@ -91,7 +91,7 @@ impl Neuralnet {
 		}
 	}
 
-	pub fn feed_forward(&mut self, inputs:&Vec<f64>) -> Vec<f64> {
+	pub fn feed_forward(&mut self, inputs:&[f64]) -> Vec<f64> {
 		if inputs.len() != self.layers[0] {
 			panic!("Inputs [{}] length is not equal to neuralnet first layer dimension [{}].", inputs.len(), self.layers[0]);
 		} 
