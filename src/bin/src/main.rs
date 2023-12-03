@@ -1,4 +1,4 @@
-use neuros::{trainer::Evonet, activations::Activations};
+use neuros::{trainer::{Evonet, TrainerParams}, activations::Activations};
 
 extern crate neuros;
 use linfa::dataset::Dataset;
@@ -38,9 +38,9 @@ fn main() {
             let a2 : f64 = 2.0;
             let gp :f64 = 0.5;
 
-            let params : EOparams = EOparams::new(population_size, dimensions, max_iterations, &lb, &ub, a1, a2, gp);  
-            
-            ann.do_learning(&params);
+            let eoparams : EOparams = EOparams::new(population_size, dimensions, max_iterations, &lb, &ub, a1, a2, gp);  
+            let trainer_params = TrainerParams::EoParams(eoparams); 
+            ann.do_learning(&trainer_params);
         }
     }
     

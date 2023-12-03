@@ -20,7 +20,8 @@ use sefar::sequential_algos::pso::PSOparams;
 
 ///
 /// Parameters of the training algorithm.
-/// 
+/// EoParams(PSOparams<'a>): Parameters for Equilibrium Optimizer,
+/// PsoParams(PSOparams<'a>): Parameters for Particle Swarm Optimizer,
 pub enum TrainerParams<'a>{
     EoParams(EOparams<'a>),
     PsoParams(PSOparams<'a>),
@@ -81,24 +82,22 @@ impl<'a> Evonet<'a> {
     /// perform supervised learning.
     ///     
     #[allow(dead_code)]
-    pub fn do_learning(&mut self, params : &EOparams) -> OptimizationResult {
+    pub fn do_learning(&mut self, params : &TrainerParams) -> OptimizationResult {
         let wb = self.neuralnetwork.get_weights_biases_count();
         let lb = vec![-5.0; wb]; //Vec::new();
         let ub = vec![5.0; wb];
         
-        let newparams = EOparams {
-            population_size : params.population_size,           
-            max_iterations : params.max_iterations,
-            dimensions  : wb,
-            lower_bounds : &lb,
-            upper_bounds : &ub,
-            a1 : params.a1,
-            a2 : params.a2,
-            gp : params.gp,
-        };
+      let result =  match params{
+            TrainerParams::EoParams(params) => {
+                sefar::sequential_algos::eo::eo(&params, self)
+            },
 
+            TrainerParams::PsoParams(params)=>{
+                sefar::sequential_algos::pso::pso(&params, self)
+            },
+        };       
                      
-        let result  = sefar::sequential_algos::eo::eo(&newparams, self);
+        //
         result
     }
     
