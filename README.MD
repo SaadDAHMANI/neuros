@@ -10,7 +10,7 @@ The current version includes:
 
 ## How to use NEUROS
 ```rust
-    use neuros::{trainer::{Evonet, TrainerParams}, activations::Activations};
+use neuros::{trainer::{Evonet, TrainerParams}, activations::Activations};
 extern crate neuros;
 use linfa::dataset::Dataset;
 use ndarray::{Ix1, array};
@@ -56,7 +56,6 @@ fn main() {
             test_pso_trainer(ann);
         }
     }   
-
 }
 
 ///
@@ -83,7 +82,6 @@ pub fn test_eo_trainer(ann : &mut Evonet){
    println!("RMSE_Learning = {:?}", learning_results.best_fitness);
 }
 
-
 ///
 /// Run training using Equilibrium Optimizer.
 ///   
@@ -106,10 +104,6 @@ pub fn test_pso_trainer(ann : &mut Evonet){
 
    println!("RMSE_Learning = {:?}", learning_results.best_fitness);
 }
-
-
-
-
 ```
 
  
