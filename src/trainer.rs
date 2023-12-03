@@ -16,6 +16,15 @@ use sefar::sequential_algos::eo::*;
 use sefar::core::genome::*;
 use sefar::core::objectivefunction::Objectivefunction;
 use sefar::core::optimization_result::OptimizationResult;
+use sefar::sequential_algos::pso::PSOparams;
+
+///
+/// Parameters of the training algorithm.
+/// 
+pub enum TrainerParams<'a>{
+    EoParams(EOparams<'a>),
+    PsoParams(PSOparams<'a>),
+}
 
 pub struct Evonet<'a> {
     // max_iter : usize;
