@@ -1,10 +1,8 @@
 use neuros::{trainer::{Evonet, TrainerParams}, activations::Activations};
-
 extern crate neuros;
 use linfa::dataset::Dataset;
 use ndarray::{Ix1, array};
 use sefar::sequential_algos::{eo::EOparams, pso::PSOparams};
-
 
 fn main() {
     println!("Hello, NEUROS!");
@@ -38,11 +36,14 @@ fn main() {
     match &mut ann_restult{
         Err(error) => panic!("Finish due to error : {}", error),
         Ok(ann)=>{
-
             
+            // run eo_trainer
+            test_eo_trainer(ann);
+
+            // run pso_trainer
+            test_pso_trainer(ann);
         }
-    }
-    
+    }   
 
 }
 
@@ -69,7 +70,6 @@ pub fn test_eo_trainer(ann : &mut Evonet){
 
    println!("RMSE_Learning = {:?}", learning_results.best_fitness);
 }
-
 
 
 ///
