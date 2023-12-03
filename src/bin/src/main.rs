@@ -40,17 +40,20 @@ fn main() {
         Ok(ann)=>{
 
             // define arameters for the training (learning algorithm) 
-            let population_size : usize =10;
-            let dimensions: usize = ann.get_weights_biases_count();
-            let max_iterations : usize = 10;
-            let lb = vec![-5.0; dimensions];
-            let ub = vec![5.0; dimensions];
-            let a1 : f64 = 2.0;
-            let a2 : f64 = 2.0;
-            let gp :f64 = 0.5;
+            let population_size : usize = 100; // set the search poplation size,
+            let dimensions: usize = ann.get_weights_biases_count(); // get the search space dimension, 
+            let max_iterations : usize = 1000; // set the maximum number of iterations (learning step),
+            let lb = vec![-5.0; dimensions]; // set the lower bound for the search space,
+            let ub = vec![5.0; dimensions]; // set the upper bound for the search space,
+            let a1 : f64 = 2.0; // give the value of a1 parameter (Equilibrium Optimizer),
+            let a2 : f64 = 2.0; // give the value of a2 parameter (Equilibrium Optimizer),
+            let gp :f64 = 0.5; // give the value of GP parameter (Equilibrium Optimizer),
 
+            // create the EO parameters (learning algorithm)
             let eoparams : EOparams = EOparams::new(population_size, dimensions, max_iterations, &lb, &ub, a1, a2, gp);  
             let trainer_params = TrainerParams::EoParams(eoparams); 
+            
+            // perform the learning step. 
             ann.do_learning(&trainer_params);
         }
     }
