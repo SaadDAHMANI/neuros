@@ -1,4 +1,3 @@
-use std::option::Iter;
 
 use super::activations::*;
 use super::neuralnet::*;
@@ -9,11 +8,7 @@ use linfa::dataset::Dataset;
 extern crate ndarray;
 use ndarray::Ix1;
 
-use rand::prelude::*;
-
-use sefar::sequential_algos::eo;
 use sefar::sequential_algos::eo::*;
-use sefar::core::genome::*;
 use sefar::core::objectivefunction::Objectivefunction;
 use sefar::core::optimization_result::OptimizationResult;
 use sefar::sequential_algos::pso::PSOparams;
@@ -83,9 +78,9 @@ impl<'a> Evonet<'a> {
     ///     
     #[allow(dead_code)]
     pub fn do_learning(&mut self, params : &TrainerParams) -> OptimizationResult {
-        let wb = self.neuralnetwork.get_weights_biases_count();
-        let lb = vec![-5.0; wb]; //Vec::new();
-        let ub = vec![5.0; wb];
+        //let wb = self.neuralnetwork.get_weights_biases_count();
+        //let lb = vec![-5.0; wb]; //Vec::new();
+        //let ub = vec![5.0; wb];
         
       let result =  match params{
             TrainerParams::EoParams(params) => {

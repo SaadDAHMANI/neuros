@@ -2,13 +2,14 @@ pub mod activations;
 pub mod neuralnet;
 pub mod trainer;
 
-use linfa::dataset::DatasetView;
-use ndarray::{Ix1, array};
+
 
 
 #[cfg(test)]
 mod tests {
     use super::*;
+    use linfa::dataset::DatasetView;
+    use ndarray::{Ix1, array};
 
     #[test]
     fn it_works() {
