@@ -129,6 +129,8 @@ impl<'a> Objectivefunction for Evonet<'a>{
          //1. Update weights and biases :
          self.neuralnetwork.update_weights_biases(genome);
           
+          let mut sum_error : f64 = 0.0;
+
          let learning_err = match &self.learning_set {
              None => f64::NAN,
              Some(train_set)=>{
@@ -136,13 +138,33 @@ impl<'a> Objectivefunction for Evonet<'a>{
                 for (x, y) in train_set.sample_iter(){
                     match x.as_slice() {
                         None=>{},
-                        Some(vector)=> {
-                            let computed =  self.neuralnetwork.feed_forward(vector);
+                        Some(x_vector)=> {
+                            let computed =  self.neuralnetwork.feed_forward(x_vector);
+                            match y.as_slice() {
+                                None => {},
+                                Some(y_vector)=> {
+                                    
+                                    //match y_vector.first() {
+                                    //    None=>{},
+                                    //    Some(a)=>{
+                                            match computed.first() {
+                                                None =>{},
+                                                Some(b)=>{
+                                                    sum_error += (y_vector[0]-b).powi(2);
+                                                },
+                                            } 
+                                      //  },
+                                   // }
+                                    
+                                    //compute error for one output                                  
+                                    
+                                },
+                            }
                         },
                     }
                       };
-
-                0.0
+                      // compute RMSE for learning sampla
+                 sum_error/train_set.records.len() as f64     
              }, 
          }; 
                
