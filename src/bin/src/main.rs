@@ -14,10 +14,10 @@ fn main() {
     let activations = [Activations::Sigmoid, Activations::Sigmoid, Activations::Sigmoid].to_vec();
 
     //Give input data samples
-    let records = array![[1.,1.], [2.,1.], [3.,2.], [4.,1.],[5., 3.], [6.,2.]];
+    let records = array![[0.,0.], [1.,0.], [0.,1.], [1.,1.]];
    
     //Give output data samples
-    let targets = array![1.0, 1.0, 0.0, 1.0, 0.0, 0.0];
+    let targets = array![0., 1., 1., 0.];
     
     //Create a data set from (inputs, outputs) samples
     let dataset : Dataset<f64, f64, Ix1> = Dataset::new(records, targets);
