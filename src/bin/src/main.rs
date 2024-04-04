@@ -30,7 +30,7 @@ fn main() {
      //Path of the data set:
      let path = "src/bin/src/data/sin_xy.csv";
 
-    ann_test_2(path);
+     ann_test_2(path);
          
 
 }

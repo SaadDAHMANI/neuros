@@ -3,6 +3,7 @@ use super::activations::*;
 use super::neuralnet::*;
 
 extern crate linfa;
+use linfa::dataset::Records;
 use linfa::Dataset;
 
 use ndarray::Ix2;
@@ -135,6 +136,23 @@ impl<'a> Evonet<'a> {
         result
     }
     
+
+    pub fn do_testing(&mut self)->Vec<Vec<f64>>{
+        let mut testing_result : Vec<Vec<f64>> = Vec::with_capacity(self.testing_set.nsamples());
+
+        for (x, y) in self.testing_set.sample_iter(){
+            match x.as_slice(){
+                None =>{},
+                Some(x_vec) => {
+                    let computed =  self.neuralnetwork.feed_forward(x_vec);
+                    testing_result.push(computed);
+                },
+            };
+        }
+        testing_result
+    } 
+
+
     #[allow(dead_code)]
      fn convert22dvec(ds : &Vec<f64>)->Vec<Vec<f64>>{
         
