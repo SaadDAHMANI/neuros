@@ -168,7 +168,7 @@ impl Neuralnet {
 		}
 	}
 
-	pub fn update_weights_biases(&mut self, new_weights_biases : &Vec<f64> ){
+	pub fn update_weights_biases(&mut self, new_weights_biases : &[f64]){
 
 		let mut l : usize = 0;
 

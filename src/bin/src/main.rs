@@ -9,7 +9,7 @@ use neuros::{trainer::{Evonet, TrainerParams}, activations::Activations};
 use linfa::dataset::Dataset;
 use ndarray::{Ix1, array};
 //-------------------------------------------------------------------------
-use sefar::sequential_algos::{eo::EOparams, pso::PSOparams};
+
 //-------------------------------------------------------------------------
 use csv::{ReaderBuilder, WriterBuilder};
 use ndarray::{Array2, ArrayBase, Axis, Data, Ix2, OwnedRepr, Dim};

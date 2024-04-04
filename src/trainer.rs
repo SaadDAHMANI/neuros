@@ -3,17 +3,26 @@ use super::activations::*;
 use super::neuralnet::*;
 
 extern crate linfa;
+use linfa::Dataset;
 
+use ndarray::Ix1;
+
+extern crate sefar;
+use sefar::core::eoa::EOA;
+use sefar::core::{problem::Problem, optimization_result::OptimizationResult};
+use sefar::algos::go::{GO, GOparams};
 
 ///
 /// Parameters of the training algorithm.
 /// EoParams(PSOparams<'a>): Parameters for Equilibrium Optimizer,
 /// PsoParams(PSOparams<'a>): Parameters for Particle Swarm Optimizer,
 pub enum TrainerParams<'a>{
-    EoParams(EOparams<'a>),
-    PsoParams(PSOparams<'a>),
+    //EoParams(EOparams<'a>),
+    //PsoParams(PSOparams<'a>),
+    GoParams(GOparams<'a>),
 }
 
+#[derive(Debug, Clone)]
 pub struct Evonet<'a> {
     // max_iter : usize;
     pub dataset : &'a Dataset<f64, f64, Ix1>,
@@ -21,8 +30,8 @@ pub struct Evonet<'a> {
     pub activations: &'a Vec<Activations>,
 	pub layers: &'a Vec<usize>,
     neuralnetwork : Neuralnet,
-    learning_set : Option<Dataset<f64, f64, Ix1>>,
-    testing_set :  Option<Dataset<f64, f64, Ix1>>,
+    learning_set : Dataset<f64, f64, Ix1>,
+    testing_set :  Dataset<f64, f64, Ix1>,
 }
 
 impl<'a> Evonet<'a> {
@@ -56,8 +65,8 @@ impl<'a> Evonet<'a> {
             activations,
             layers,
             neuralnetwork: nnet,
-            learning_set : Some(training_set),
-            testing_set : Some(testing_set),
+            learning_set : training_set,
+            testing_set : testing_set,
         })
     }
 
@@ -75,12 +84,18 @@ impl<'a> Evonet<'a> {
         //let ub = vec![5.0; wb];
         
       let result =  match params{
-            TrainerParams::EoParams(params) => {
-                sefar::sequential_algos::eo::eo(&params, self)
-            },
+            // TrainerParams::EoParams(params) => {
+            //     sefar::sequential_algos::eo::eo(&params, self)
+            // },
 
-            TrainerParams::PsoParams(params)=>{
-                sefar::sequential_algos::pso::pso(&params, self)
+            // TrainerParams::PsoParams(params)=>{
+            //     sefar::sequential_algos::pso::pso(&params, self)
+            // },
+
+            TrainerParams::GoParams(params) => {
+                  let mut algo = GO::<Evonet>::new(params, self);
+                  let result = algo.run();
+                  result
             },
         };       
                      
@@ -102,60 +117,41 @@ impl<'a> Evonet<'a> {
         result
     }
 }    
-  
-impl<'a> Objectivefunction for Evonet<'a>{
-    fn evaluate(&mut self, genome : &Vec<f64>)->f64 {
-                         
-        //let kf : usize = match self.k_fold {
-        //        None =>  1,
-        //        Some(kf) =>  kf,
-        // };
-         
-        //let kfolds = self.dataset.fold(kf);  
 
+impl<'a> Problem for Evonet<'a> {
+    fn objectivefunction(&mut self, genome : &[f64])->f64 {
+                       
          //1. Update weights and biases :
-         self.neuralnetwork.update_weights_biases(genome);
+        self.neuralnetwork.update_weights_biases(genome);
           
-          let mut sum_error : f64 = 0.0;
-
-         let learning_err = match &self.learning_set {
-             None => f64::NAN,
-             Some(train_set)=>{
-
-                for (x, y) in train_set.sample_iter(){
-                    match x.as_slice() {
-                        None=>{},
-                        Some(x_vector)=> {
-                            let computed =  self.neuralnetwork.feed_forward(x_vector);
-                            match y.as_slice() {
-                                None => {},
-                                Some(y_vector)=> {
+        let mut sum_error : f64 = 0.0;
+        for (x, y) in self.learning_set.sample_iter(){
+            match x.as_slice() {
+                None=>{},
+                Some(x_vector)=> {
+                    let computed =  self.neuralnetwork.feed_forward(x_vector);
+                        match y.as_slice() {
+                            None => {},
+                            Some(y_vector)=> {
                                     
-                                    //match y_vector.first() {
-                                    //    None=>{},
-                                    //    Some(a)=>{
-                                            match computed.first() {
-                                                None =>{},
-                                                Some(b)=>{
-                                                    sum_error += (y_vector[0]-b).powi(2);
-                                                },
-                                            } 
-                                      //  },
-                                   // }
-                                    
-                                    //compute error for one output                                  
-                                    
-                                },
-                            }
-                        },
-                    }
-                      };
+                            //match y_vector.first() {
+                            //    None=>{},
+                            //    Some(a)=>{
+                                match computed.first() {
+                                    None =>{},
+                                    Some(b)=>{
+                                        sum_error += (y_vector[0]-b).powi(2);
+                                    },
+                                } 
+                            },
+                        };
+                    },
+                }
+            };
                       // compute RMSE for learning sampla
-                 sum_error/train_set.records.len() as f64     
-             }, 
-         }; 
-               
-         learning_err 
+                 sum_error/self.learning_set.records.len() as f64     
+        
+        //learning_err 
     }
     
 
