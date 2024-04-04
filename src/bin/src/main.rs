@@ -1,11 +1,28 @@
-use neuros::{trainer::{Evonet, TrainerParams}, activations::Activations};
 extern crate neuros;
+extern crate ndarray;
+extern crate linfa;
+extern crate csv;
+extern crate ndarray_csv;
+
+//-------------------------------------------------------------------------
+use neuros::{trainer::{Evonet, TrainerParams}, activations::Activations};
 use linfa::dataset::Dataset;
 use ndarray::{Ix1, array};
+//-------------------------------------------------------------------------
 use sefar::sequential_algos::{eo::EOparams, pso::PSOparams};
+//-------------------------------------------------------------------------
+use csv::{ReaderBuilder, WriterBuilder};
+use ndarray::{Array, Array2};
+use ndarray_csv::{Array2Reader, Array2Writer};
+use std::error::Error;
+use std::fs::File;
+//----------------------------------------------------------------------------
+
 
 fn main() {
     println!("Hello, NEUROS!");
+
+    //
 
     // Give the ANN structure. 
     let layers = [2, 3, 1].to_vec();
@@ -93,4 +110,14 @@ pub fn test_pso_trainer(ann : &mut Evonet){
    let learning_results = ann.do_learning(&trainer_params);
 
    println!("RMSE_Learning = {:?}", learning_results.best_fitness);
+}
+
+pub fn read_csv(path : &str)-> Result<Array2<f64>, Box<dyn Error>>{
+    // Read an array back from the file
+    let file = File::open(path)?;
+    let mut reader = ReaderBuilder::new().has_headers(false).from_reader(file);
+    //let array_read: Array2<u64> = reader.deserialize_array2((2, 3))?;
+    let array_read: Array2<f64> = reader.deserialize_array2_dynamic()?;
+
+    Ok(array_read)
 }
