@@ -5,7 +5,7 @@ use super::neuralnet::*;
 extern crate linfa;
 use linfa::Dataset;
 
-use ndarray::Ix1;
+use ndarray::{Ix1,Ix2};
 
 extern crate sefar;
 use sefar::core::eoa::EOA;
@@ -25,19 +25,31 @@ pub enum TrainerParams<'a>{
 #[derive(Debug, Clone)]
 pub struct Evonet<'a> {
     // max_iter : usize;
-    pub dataset : &'a Dataset<f64, f64, Ix1>,
+    pub dataset : &'a Dataset<f64, f64, Ix2>,
     pub k_fold : Option<usize>,
     pub activations: &'a Vec<Activations>,
 	pub layers: &'a Vec<usize>,
     neuralnetwork : Neuralnet,
-    learning_set : Dataset<f64, f64, Ix1>,
-    testing_set :  Dataset<f64, f64, Ix1>,
+    learning_set : Dataset<f64, f64, Ix2>,
+    testing_set :  Dataset<f64, f64, Ix2>,
+
+    /// number of records (i.e., of samples).
+    record_count : usize,
+
+    /// number of features in records.
+    record_features : usize,
+
+    /// number of targets (i.e., of samples).
+    target_count : usize,
+
+    /// number of features in targets.
+    target_features : usize,
 }
 
 impl<'a> Evonet<'a> {
 
     #[allow(dead_code)]
-    pub fn new(layers: &'a Vec<usize>, activations :&'a Vec<Activations>, dataset : &'a Dataset<f64, f64, Ix1>, k_fold : Option<usize>, shuffle: bool, split_ratio : f32)-> Result<Evonet<'a>, String>{
+    pub fn new(layers: &'a Vec<usize>, activations :&'a Vec<Activations>, dataset : &'a Dataset<f64, f64, Ix2>, k_fold : Option<usize>, shuffle: bool, split_ratio : f32)-> Result<Evonet<'a>, String>{
         
         if layers.len() < 2 {
           return Err("Layers must be greater than 1.".to_owned());
@@ -57,7 +69,10 @@ impl<'a> Evonet<'a> {
         let (training_set, testing_set) = tmp_dataset.split_with_ratio(split_ratio);
                 
         let nnet : Neuralnet = Neuralnet::new(layers.clone(), activations.clone());
-        
+
+        let (record_count, record_features) = dataset.records.dim();
+        let (target_count, target_features) = dataset.targets.dim();
+       
         Ok (Evonet {
            // max_iter : iterations,
             dataset,
@@ -67,6 +82,10 @@ impl<'a> Evonet<'a> {
             neuralnetwork: nnet,
             learning_set : training_set,
             testing_set : testing_set,
+            record_count,
+            record_features,
+            target_count, 
+            target_features,
         })
     }
 
@@ -123,8 +142,9 @@ impl<'a> Problem for Evonet<'a> {
                        
          //1. Update weights and biases :
         self.neuralnetwork.update_weights_biases(genome);
-          
-        let mut sum_error : f64 = 0.0;
+        
+        let mut errors : Vec<f64> = vec![0.0; self.target_features];
+
         for (x, y) in self.learning_set.sample_iter(){
             match x.as_slice() {
                 None=>{},
@@ -132,26 +152,24 @@ impl<'a> Problem for Evonet<'a> {
                     let computed =  self.neuralnetwork.feed_forward(x_vector);
                         match y.as_slice() {
                             None => {},
-                            Some(y_vector)=> {
-                                    
-                            //match y_vector.first() {
-                            //    None=>{},
-                            //    Some(a)=>{
-                                match computed.first() {
-                                    None =>{},
-                                    Some(b)=>{
-                                        sum_error += (y_vector[0]-b).powi(2);
-                                    },
-                                } 
+                            Some(y_vector)=> {                                  
+                                for j in 0..self.target_features{
+                                    errors[j] += (y_vector[j] - computed[j]).powi(2);
+                                }                            
                             },
                         };
                     },
                 }
             };
-                      // compute RMSE for learning sampla
-                 sum_error/self.learning_set.records.len() as f64     
+            
+            // compute RMSE for learning samples for each output
+            for i in 0..self.target_features {
+                errors[i] = f64::sqrt(errors[i]/self.target_features as f64);
+            }              
         
-        //learning_err 
+        //learning_err = sum of RMSE errors:
+        let rmse_error : f64 = errors.iter().fold(0.0f64, |sum, a| sum + a);
+        rmse_error
     }
     
 

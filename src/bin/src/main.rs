@@ -7,13 +7,12 @@ extern crate ndarray_csv;
 //-------------------------------------------------------------------------
 use neuros::{trainer::{Evonet, TrainerParams}, activations::Activations};
 use linfa::dataset::Dataset;
-use ndarray::{Ix1, array};
 //-------------------------------------------------------------------------
 
 //-------------------------------------------------------------------------
-use csv::{ReaderBuilder, WriterBuilder};
-use ndarray::{Array2, ArrayBase, Axis, Data, Ix2, OwnedRepr, Dim};
-use ndarray_csv::{Array2Reader, Array2Writer};
+use csv::ReaderBuilder;
+use ndarray::{array, Array2, ArrayBase, Axis, Data, Ix2, OwnedRepr, Dim};
+use ndarray_csv::Array2Reader;
 use core::panic;
 use std::error::Error;
 use std::fs::File;
@@ -47,10 +46,10 @@ fn ann_test_1(){
      let records = array![[0.,0.], [1.,0.], [0.,1.], [1.,1.]];
     
      //Give output data samples
-     let targets = array![0., 1., 1., 0.];
+     let targets = array![[0.], [1.], [1.], [0.]];
      
      //Create a data set from (inputs, outputs) samples
-     let dataset : Dataset<f64, f64, Ix1> = Dataset::new(records, targets);
+     let dataset : Dataset<f64, f64, Ix2> = Dataset::new(records, targets);
  
      let k_fold : Option<usize> = Some(2);
  
@@ -104,20 +103,10 @@ fn ann_test_2(path : &str){
             // records : inputs,
             // targets : outputs.
             let (records, targets) = data.view().split_at(Axis(1), 2);
-
-            let array2d: ArrayBase<OwnedRepr<f64>, Dim<[usize; 2]>> = targets.to_owned();
-
-             // Convert to 1D array
-            let n : usize = array2d.len();
-
-            let target: ArrayBase<OwnedRepr<f64>, ndarray::Dim<[usize; 1]>> = match array2d.into_shape((n,)){
-                Err(eror) => panic!("I can not convert target into 1D, because of : {:?}", eror),
-                Ok(data)=> data,
-            };
-
+            
             ////Create a data set from (inputs, outputs) samples
-            let dataset : Dataset<f64, f64, Ix1> = Dataset::new(records.to_owned(),target);
-
+            let dataset : Dataset<f64, f64, Ix2> = Dataset::new(records.to_owned(),targets.to_owned());
+           
             let k_fold : Option<usize> = Some(2);
  
             // shuffle the dataset
