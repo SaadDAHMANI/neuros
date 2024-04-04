@@ -9,16 +9,16 @@ extern crate sefar;
 use linfa::dataset::Dataset;
 //-------------------------------------------------------------------------
 use csv::ReaderBuilder;
-use ndarray::{array, Array2, ArrayBase, Axis, Data, Ix2, OwnedRepr, Dim};
+use ndarray::{array, Array2, Axis, Ix2};
 use ndarray_csv::Array2Reader;
 use core::panic;
 use std::error::Error;
 use std::fs::File;
 //--------------------------------------------------------------------------
 use neuros::{trainer::{Evonet, TrainerParams}, activations::Activations};
-use sefar::algos::go::{GO, GOparams};
-use sefar::algos::eo::{EO, EOparams};
-use sefar::algos::pso::{PSO, PSOparams};
+use sefar::algos::go::GOparams;
+use sefar::algos::eo::EOparams;
+use sefar::algos::pso::PSOparams;
 //--------------------------------------------------------------------------
 
 fn main() {
@@ -69,10 +69,10 @@ fn ann_test_1(){
          Ok(ann)=>{
              
              // run eo_trainer
-             //test_eo_trainer(ann);
+             test_eo_trainer(ann);
  
              // run pso_trainer
-             //test_pso_trainer(ann);
+              test_pso_trainer(ann);
          }
      }
 }
@@ -130,6 +130,7 @@ fn ann_test_2(path : &str){
                 Err(error) => panic!("Finish due to error : {}", error),
                 Ok(ann)=>{
                     
+                    // Run Growth optimizer trainer for the given ANN.
                     test_go_trainer(ann);                
                     
                 }

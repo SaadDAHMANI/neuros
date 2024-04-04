@@ -5,7 +5,7 @@ use super::neuralnet::*;
 extern crate linfa;
 use linfa::Dataset;
 
-use ndarray::{Ix1,Ix2};
+use ndarray::Ix2;
 
 extern crate sefar;
 use sefar::core::eoa::EOA;
@@ -36,16 +36,16 @@ pub struct Evonet<'a> {
     testing_set :  Dataset<f64, f64, Ix2>,
 
     /// number of records (i.e., of samples).
-    record_count : usize,
+    _record_count : usize,
 
     /// number of features in records.
-    record_features : usize,
+    _record_features : usize,
 
     /// number of targets (i.e., of samples).
-    target_count : usize,
+    _target_count : usize,
 
     /// number of features in targets.
-    target_features : usize,
+    _target_features : usize,
 }
 
 impl<'a> Evonet<'a> {
@@ -72,8 +72,8 @@ impl<'a> Evonet<'a> {
                 
         let nnet : Neuralnet = Neuralnet::new(layers.clone(), activations.clone());
 
-        let (record_count, record_features) = dataset.records.dim();
-        let (target_count, target_features) = dataset.targets.dim();
+        let (_record_count, _record_features) = dataset.records.dim();
+        let (_target_count, _target_features) = dataset.targets.dim();
        
         Ok (Evonet {
            // max_iter : iterations,
@@ -84,10 +84,10 @@ impl<'a> Evonet<'a> {
             neuralnetwork: nnet,
             learning_set : training_set,
             testing_set : testing_set,
-            record_count,
-            record_features,
-            target_count, 
-            target_features,
+            _record_count,
+            _record_features,
+            _target_count, 
+            _target_features,
         })
     }
 
@@ -101,26 +101,32 @@ impl<'a> Evonet<'a> {
     #[allow(dead_code)]
     pub fn do_learning(&mut self, params : &TrainerParams) -> OptimizationResult {
         let wb = self.neuralnetwork.get_weights_biases_count();
-        let lb = vec![-5.0; wb]; //Vec::new();
-        let ub = vec![5.0; wb];
-        
+        //let lb = vec![-5.0; wb]; //Vec::new();
+        //let ub = vec![5.0; wb];
+                
       let result =  match params{
             // Use EO as trainer
             TrainerParams::EoParams(params) => {
-                let mut algo = EO::<Evonet>::new(params, self);
+                let mut settings = params.clone();
+                settings.dimensions = wb;
+                let mut algo = EO::<Evonet>::new(&settings, self);
                  algo.run()               
             },
 
             // Use POS as trainer
             TrainerParams::PsoParams(params)=>{
-                let mut algo = PSO::<Evonet>::new(params, self);
+                let mut settings = params.clone();
+                settings.dimensions = wb;
+                let mut algo = PSO::<Evonet>::new(&settings, self);
                 algo.run()
             },
 
             // Use GO as trainer
             TrainerParams::GoParams(params) => {
-                   let mut algo = GO::<Evonet>::new(params, self);
-                    algo.run()
+                let mut settings = params.clone();
+                settings.dimensions = wb;
+                let mut algo = GO::<Evonet>::new(&settings, self);
+                algo.run()
                  
             },
         };       
@@ -150,7 +156,7 @@ impl<'a> Problem for Evonet<'a> {
          //1. Update weights and biases :
         self.neuralnetwork.update_weights_biases(genome);
         
-        let mut errors : Vec<f64> = vec![0.0; self.target_features];
+        let mut errors : Vec<f64> = vec![0.0; self._target_features];
 
         for (x, y) in self.learning_set.sample_iter(){
             match x.as_slice() {
@@ -160,7 +166,7 @@ impl<'a> Problem for Evonet<'a> {
                         match y.as_slice() {
                             None => {},
                             Some(y_vector)=> {                                  
-                                for j in 0..self.target_features{
+                                for j in 0..self._target_features{
                                     errors[j] += (y_vector[j] - computed[j]).powi(2);
                                 }                            
                             },
@@ -170,8 +176,8 @@ impl<'a> Problem for Evonet<'a> {
             };
             
             // compute RMSE for learning samples for each output
-            for i in 0..self.target_features {
-                errors[i] = f64::sqrt(errors[i]/self.target_features as f64);
+            for i in 0..self._target_features {
+                errors[i] = f64::sqrt(errors[i]/self._target_features as f64);
             }              
         
         //learning_err = sum of RMSE errors:
