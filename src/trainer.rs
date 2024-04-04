@@ -11,14 +11,16 @@ extern crate sefar;
 use sefar::core::eoa::EOA;
 use sefar::core::{problem::Problem, optimization_result::OptimizationResult};
 use sefar::algos::go::{GO, GOparams};
+use sefar::algos::eo::{EO, EOparams};
+use sefar::algos::pso::{PSO, PSOparams};
 
 ///
 /// Parameters of the training algorithm.
 /// EoParams(PSOparams<'a>): Parameters for Equilibrium Optimizer,
 /// PsoParams(PSOparams<'a>): Parameters for Particle Swarm Optimizer,
 pub enum TrainerParams<'a>{
-    //EoParams(EOparams<'a>),
-    //PsoParams(PSOparams<'a>),
+    EoParams(EOparams<'a>),
+    PsoParams(PSOparams<'a>),
     GoParams(GOparams<'a>),
 }
 
@@ -103,18 +105,23 @@ impl<'a> Evonet<'a> {
         let ub = vec![5.0; wb];
         
       let result =  match params{
-            // TrainerParams::EoParams(params) => {
-            //     sefar::sequential_algos::eo::eo(&params, self)
-            // },
+            // Use EO as trainer
+            TrainerParams::EoParams(params) => {
+                let mut algo = EO::<Evonet>::new(params, self);
+                 algo.run()               
+            },
 
-            // TrainerParams::PsoParams(params)=>{
-            //     sefar::sequential_algos::pso::pso(&params, self)
-            // },
+            // Use POS as trainer
+            TrainerParams::PsoParams(params)=>{
+                let mut algo = PSO::<Evonet>::new(params, self);
+                algo.run()
+            },
 
+            // Use GO as trainer
             TrainerParams::GoParams(params) => {
-                  let mut algo = GO::<Evonet>::new(params, self);
-                  let result = algo.run();
-                  result
+                   let mut algo = GO::<Evonet>::new(params, self);
+                    algo.run()
+                 
             },
         };       
                      

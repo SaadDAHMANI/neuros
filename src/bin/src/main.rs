@@ -17,7 +17,8 @@ use std::fs::File;
 //--------------------------------------------------------------------------
 use neuros::{trainer::{Evonet, TrainerParams}, activations::Activations};
 use sefar::algos::go::{GO, GOparams};
-
+use sefar::algos::eo::{EO, EOparams};
+use sefar::algos::pso::{PSO, PSOparams};
 //--------------------------------------------------------------------------
 
 fn main() {
@@ -128,12 +129,8 @@ fn ann_test_2(path : &str){
             match &mut ann_restult{
                 Err(error) => panic!("Finish due to error : {}", error),
                 Ok(ann)=>{
-                                       
-                    // run eo_trainer
-                    //test_eo_trainer(ann);
-        
-                    // run pso_trainer
-                    //test_pso_trainer(ann);
+                    test_eo_trainer(ann);                 
+                    
                 }
             };
         },
@@ -154,7 +151,14 @@ fn test_go_trainer(ann : &mut Evonet){
     let ub = vec![5.0; dimensions]; // set the upper bound for the search space,
 
     // create the EO parameters (learning algorithm)
-    let params : GOparams = GOparams::new(population_size, dimensions, max_iterations, &lb, &ub);  
+    let params : GOparams = GOparams {
+        population_size,
+        dimensions,
+        max_iterations,
+        lower_bounds: &lb, 
+        upper_bounds : &ub,
+    };  
+
     let trainer_params = TrainerParams::GoParams(params); 
     
     // perform the learning step. 
@@ -174,17 +178,21 @@ fn test_eo_trainer(ann : &mut Evonet){
     let lb = vec![-5.0; dimensions]; // set the lower bound for the search space,
     let ub = vec![5.0; dimensions]; // set the upper bound for the search space,
     let a1 : f64 = 2.0; // give the value of a1 parameter (Equilibrium Optimizer),
-    let a2 : f64 = 2.0; // give the value of a2 parameter (Equilibrium Optimizer),
+    let a2 : f64 = 1.0; // give the value of a2 parameter (Equilibrium Optimizer),
     let gp :f64 = 0.5; // give the value of GP parameter (Equilibrium Optimizer),
 
     // create the EO parameters (learning algorithm)
-    let params : EOparams = EOparams::new(population_size, dimensions, max_iterations, &lb, &ub, a1, a2, gp);  
-    let trainer_params = TrainerParams::EoParams(params); 
+    let params = EOparams::new(population_size, dimensions, max_iterations, &lb, &ub, a1, a2, gp);  
     
-    // perform the learning step. 
-   let learning_results = ann.do_learning(&trainer_params);
-
-   println!("RMSE_Learning = {:?}", learning_results.best_fitness);
+    match params {
+        Err(eror) => println!("I can not run because this error : {:?}", eror),
+        Ok(settings)=> {
+            let trainer_params = TrainerParams::EoParams(settings); 
+             // perform the learning step. 
+            let learning_results = ann.do_learning(&trainer_params);
+            println!("RMSE_Learning = {:?}", learning_results.best_fitness);
+        }
+    }  
 }
 
 ///
