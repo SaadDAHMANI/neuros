@@ -167,8 +167,12 @@ fn test_go_trainer(ann : &mut Evonet){
     // perform the learning step. 
    let learning_results = ann.do_learning(&trainer_params);
 
-   println!("RMSE_Learning = {:?}", learning_results.best_fitness);
+   println!("Growth Optimizer trainer : RMSE_Learning = {:?}", learning_results.best_fitness);
+
+   let x = ann.do_testing();
+   println!("Testing results : {:?}", x);
 }
+
 
 ///
 /// Run training using Equilibrium Optimizer (EO).
