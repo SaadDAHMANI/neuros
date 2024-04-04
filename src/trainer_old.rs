@@ -3,7 +3,15 @@ use super::activations::*;
 use super::neuralnet::*;
 
 extern crate linfa;
+use linfa::dataset::Dataset;
 
+extern crate ndarray;
+use ndarray::Ix1;
+
+use sefar::sequential_algos::eo::*;
+use sefar::core::objectivefunction::Objectivefunction;
+use sefar::core::optimization_result::OptimizationResult;
+use sefar::sequential_algos::pso::PSOparams;
 
 ///
 /// Parameters of the training algorithm.
@@ -157,11 +165,6 @@ impl<'a> Objectivefunction for Evonet<'a>{
                
          learning_err 
     }
-    
-
-
-   
-
 }
 
 

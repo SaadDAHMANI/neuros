@@ -13,5 +13,5 @@ ndarray-csv = "0.5.2"
 csv = "1.3.0"
 
 
-sefar = {path =  "/home/sd/Documents/Rust_apps/sefar_v002", features =["show_report"]}
-#sefar = {path ="https://github.com/SaadDAHMANI/sefar.git"}
+#sefar = {path =  "/home/sd/Documents/Rust_apps/sefar_v002", features =["show_report"]}
+sefar = {git = "https://github.com/SaadDAHMANI/sefar"}
