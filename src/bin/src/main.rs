@@ -129,7 +129,8 @@ fn ann_test_2(path : &str){
             match &mut ann_restult{
                 Err(error) => panic!("Finish due to error : {}", error),
                 Ok(ann)=>{
-                    test_eo_trainer(ann);                 
+                    
+                    test_go_trainer(ann);                
                     
                 }
             };
@@ -142,6 +143,7 @@ fn ann_test_2(path : &str){
 ///
 /// Run training using Growth Optimizer (GO).
 ///   
+#[allow(dead_code)]
 fn test_go_trainer(ann : &mut Evonet){
     // define arameters for the training (learning algorithm) 
     let population_size : usize = 50; // set the search poplation size,
@@ -170,6 +172,7 @@ fn test_go_trainer(ann : &mut Evonet){
 ///
 /// Run training using Equilibrium Optimizer (EO).
 ///   
+#[allow(dead_code)]
 fn test_eo_trainer(ann : &mut Evonet){
     // define arameters for the training (learning algorithm) 
     let population_size : usize = 100; // set the search poplation size,
@@ -190,7 +193,7 @@ fn test_eo_trainer(ann : &mut Evonet){
             let trainer_params = TrainerParams::EoParams(settings); 
              // perform the learning step. 
             let learning_results = ann.do_learning(&trainer_params);
-            println!("RMSE_Learning = {:?}", learning_results.best_fitness);
+            println!("EO trainer : RMSE_Learning = {:?}", learning_results.best_fitness);
         }
     }  
 }
@@ -198,6 +201,7 @@ fn test_eo_trainer(ann : &mut Evonet){
 ///
 /// Run training using Particle Swarm Optimizer (PSO).
 ///   
+#[allow(dead_code)] 
 fn test_pso_trainer(ann : &mut Evonet){
     // define arameters for the training (learning algorithm) 
     let population_size : usize = 100; // set the search poplation size,
@@ -205,17 +209,21 @@ fn test_pso_trainer(ann : &mut Evonet){
     let max_iterations : usize = 1000; // set the maximum number of iterations (learning step),
     let lb = vec![-5.0; dimensions]; // set the lower bound for the search space,
     let ub = vec![5.0; dimensions]; // set the upper bound for the search space,
-    let c1 : f64 = 2.0; // give the value of a1 parameter (EPSO),
+    let c1 : f64 = 2.0; // give the value of a1 parameter (PSO),
     let c2 : f64 = 2.0; // give the value of a2 parameter (PSO),
     
-    // create the EO parameters (learning algorithm)
-    let params : PSOparams = PSOparams::new(population_size, dimensions, max_iterations, &lb, &ub, c1, c2);  
-    let trainer_params = TrainerParams::PsoParams(params); 
+    // create the PSO parameters (learning algorithm)
+    let params  = PSOparams::new(population_size, dimensions, max_iterations, &lb, &ub, c1, c2);  
     
-    // perform the learning step. 
-   let learning_results = ann.do_learning(&trainer_params);
-
-   println!("RMSE_Learning = {:?}", learning_results.best_fitness);
+    match params {
+        Err(eror) => println!("I can not run because this error : {:?}", eror),
+        Ok(settings)=> {
+            let trainer_params = TrainerParams::PsoParams(settings); 
+             // perform the learning step. 
+            let learning_results = ann.do_learning(&trainer_params);
+            println!("PSO trainer : RMSE_Learning = {:?}", learning_results.best_fitness);
+        }
+    }  
 }
 
 
