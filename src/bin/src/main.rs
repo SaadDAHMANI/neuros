@@ -29,7 +29,7 @@ fn main() {
     ann_test_xor();
 
     // Run f(x, y) = sin(x*y) example
-    // ann_test_sin();
+    ann_test_sin();
 }
 
 #[allow(dead_code)]

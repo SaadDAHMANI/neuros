@@ -137,6 +137,7 @@ impl<'a> Evonet<'a> {
     }
     
     ///
+    /// Perform testing using the testing part of the given dataset  
     /// 
     pub fn do_testing(&mut self)->Vec<Vec<f64>>{
         let mut testing_result : Vec<Vec<f64>> = Vec::with_capacity(self.testing_set.nsamples());
