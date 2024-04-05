@@ -141,8 +141,8 @@ impl<'a> Evonet<'a> {
     pub fn do_testing(&mut self)->Vec<Vec<f64>>{
         let mut testing_result : Vec<Vec<f64>> = Vec::with_capacity(self.testing_set.nsamples());
 
-        for (x, y) in self.testing_set.sample_iter(){
-            match x.as_slice(){
+        for (_x, _y) in self.testing_set.sample_iter(){
+            match _x.as_slice(){
                 None =>{},
                 Some(x_vec) => {
                     let computed =  self.neuralnetwork.feed_forward(x_vec);
