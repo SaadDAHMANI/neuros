@@ -153,20 +153,17 @@ impl<'a> Evonet<'a> {
         testing_result
     } 
 
-
-    #[allow(dead_code)]
-     fn convert22dvec(ds : &Vec<f64>)->Vec<Vec<f64>>{
-        
-        let mut result = vec![vec![0.0f64; 1]; ds.len()];
-        
+  /*   #[allow(dead_code)]
+     fn convert22dvec(ds : &Vec<f64>)->Vec<Vec<f64>>{        
+        let mut result = vec![vec![0.0f64; 1]; ds.len()];        
         let mut i : usize = 0;
         for itm in ds.iter() {
             result[i][0] = itm.clone();
             i+=1;    
-        };
-                
+        };                
         result
-    }
+    } */
+
 }    
 
 impl<'a> Problem for Evonet<'a> {
