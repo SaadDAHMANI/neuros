@@ -20,12 +20,10 @@ fn ann_test_sin(){
             ////Create a data set from (inputs, outputs) samples
             let dataset : Dataset<f64, f64, Ix2> = Dataset::new(records.to_owned(),targets.to_owned());
            
-            let k_fold : Option<usize> = Some(2);
- 
             // shuffle the dataset
             let shuffle : bool = true;
         
-            //split the dataset into (70% learning, 30% testing) 
+            //split the dataset into (80% learning, 20% testing) 
             let split_ratio : f32 = 0.8;
            
             // Give the ANN structure. 
@@ -35,7 +33,7 @@ fn ann_test_sin(){
             let activations = [Activations::Sigmoid, Activations::Sigmoid, Activations::Linear].to_vec();
  
             //Create an artificial neural network using the given parameters.
-            let mut ann_restult = Evonet::new(&layers, &activations, &dataset, k_fold, shuffle, split_ratio);
+            let mut ann_restult = Evonet::new(&layers, &activations, &dataset, shuffle, split_ratio);
             
             match &mut ann_restult{
                 Err(error) => panic!("Finish due to error : {}", error),

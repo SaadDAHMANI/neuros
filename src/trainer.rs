@@ -17,21 +17,46 @@ use sefar::algos::pso::{PSO, PSOparams};
 
 ///
 /// Parameters of the training algorithm.
-/// EoParams(PSOparams<'a>): Parameters for Equilibrium Optimizer,
-/// PsoParams(PSOparams<'a>): Parameters for Particle Swarm Optimizer,
+/// # Arguments 
+/// 
+#[derive(Debug, Clone)]
 pub enum TrainerParams<'a>{
+
+    /// Parameters for Equilibrium Optimizer.
     EoParams(EOparams<'a>),
+
+    /// Parameters for Particle Swarm Optimizer.
     PsoParams(PSOparams<'a>),
+    
+    /// Parameters for Growth Optimizer.
     GoParams(GOparams<'a>),
 }
-
+/// A structure defining an Evolutionary Artificial Neural Network.
+/// 
+/// # Arguments
+/// 
+/// * `dataset`: The dataset containing learning and testing samples.
+/// 
+/// * `activations`: A list of activation functions corresponding to each layer.
+/// 
+/// * `layers`: The structure of the neural network. For example, `let layers = vec![3, 10, 1]` creates an Artificial Neural Network with 3 inputs, a hidden layer with 10 neurons, and 1 output.
+ 
 #[derive(Debug, Clone)]
 pub struct Evonet<'a> {
-    // max_iter : usize;
+    /// The dataset including learning and testing samples. 
     pub dataset : &'a Dataset<f64, f64, Ix2>,
-    pub k_fold : Option<usize>,
+
+    //pub k_fold : Option<usize>,
+    
+    /// A list of Activation functions, according to each layer.
     pub activations: &'a Vec<Activations>,
+
+    /// The structure of the neural network, 
+    /// ex., [3, 10, 1] creates an Artificial Neural Network with 03 inputs,
+    /// a hidden layer with 10 neurones and 01 output.
+    ///  
 	pub layers: &'a Vec<usize>,
+
     neuralnetwork : Neuralnet,
     learning_set : Dataset<f64, f64, Ix2>,
     testing_set :  Dataset<f64, f64, Ix2>,
@@ -51,8 +76,21 @@ pub struct Evonet<'a> {
 
 impl<'a> Evonet<'a> {
 
+    /// Create a new instance of Evonet.
+    /// 
+    /// # Arguments
+    /// 
+    /// * `layers`: A vector that specifies the structure of the artificial neural network (ANN).
+    ///   For example, `layers = vec![4, 3, 2]` creates an ANN with 4 input neurons, 3 hidden neurons, and 2 output neurons.
+    /// 
+    /// * `dataset`: A dataset containing training and testing samples. The dataset will be split according to the `split_ratio` parameter.
+    /// 
+    /// * `shuffle`: A boolean indicating whether to shuffle the dataset.
+    /// 
+    /// * `split_ratio`: The ratio used to split the dataset into learning and testing samples. For instance, `split_ratio = 0.8` means using 80% of the dataset for learning and 20% for testing.
+    ///     
     #[allow(dead_code)]
-    pub fn new(layers: &'a Vec<usize>, activations :&'a Vec<Activations>, dataset : &'a Dataset<f64, f64, Ix2>, k_fold : Option<usize>, shuffle: bool, split_ratio : f32)-> Result<Evonet<'a>, String>{
+    pub fn new(layers: &'a Vec<usize>, activations :&'a Vec<Activations>, dataset : &'a Dataset<f64, f64, Ix2>, shuffle: bool, split_ratio : f32)-> Result<Evonet<'a>, String>{
         
         if layers.len() < 2 {
           return Err("Layers must be greater than 1.".to_owned());
@@ -79,7 +117,7 @@ impl<'a> Evonet<'a> {
         Ok (Evonet {
            // max_iter : iterations,
             dataset,
-            k_fold,
+            //k_fold,
             activations,
             layers,
             neuralnetwork: nnet,
@@ -92,12 +130,15 @@ impl<'a> Evonet<'a> {
         })
     }
 
+    /// 
+    /// Return the number of ANN weights and biases.
+    /// 
     pub fn get_weights_biases_count(&self)->usize{
         self.neuralnetwork.get_weights_biases_count()
     }
 
     ///
-    /// perform supervised learning.
+    /// Conduct supervised learning utilizing the training portion of the dataset.
     ///     
     #[allow(dead_code)]
     pub fn do_learning(&mut self, params : &TrainerParams) -> OptimizationResult {
