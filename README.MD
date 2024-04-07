@@ -1,6 +1,6 @@
 # Neuros
 
-[Neuros](https://github.com/SaadDAHMANI/neuros) is a [Rust](https://www.rust-lang.org/) package for Artificial (Feedforward) Neural Networks processing.
+[Neuros](https://github.com/SaadDAHMANI/neuros) is a [Rust](https://www.rust-lang.org/) package for Artificial (Feedforward) Neural Networks (ANNs) processing. [Neuros](https://github.com/SaadDAHMANI/neuros) uses [sefar](https://crates.io/crates/sefar) crate to perform ANNs training. 
 
 ## Training algorithms 
 The current version includes the following algorithms for ANN training:
@@ -90,8 +90,6 @@ fn ann_test_xor(){
 
              // Train the neural network using Growth Optimizer (EO):
              test_go_trainer(ann);
-
-
          }
      }
 }
@@ -127,7 +125,6 @@ fn test_go_trainer(ann : &mut Evonet){
    let x = ann.do_testing();
    println!("Testing results : {:?}", x);
 }
-
 
 ///
 /// Run training using Equilibrium Optimizer (EO).
