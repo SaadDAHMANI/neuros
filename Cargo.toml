@@ -4,7 +4,7 @@ version = "0.1.1"
 edition = "2021"
 authors = ["Saad Dahmani <sd.dahmani2000@gmail.com>"] 
 description ="Neuros is a Rust package for Artificial (Feedforward) Neural Networks (ANNs) processing."
-keywords = ["neural-networks", "machine-learning", "metaheuristic", "evolutionary", "science"] 
+keywords = ["neural-network", "machine-learning", "metaheuristic", "evolutionary", "science"] 
 license = "MIT"
 
 
