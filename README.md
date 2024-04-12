@@ -64,8 +64,6 @@ fn ann_test_xor(){
      //Create a data set from (inputs, outputs) samples
      let dataset : Dataset<f64, f64, Ix2> = Dataset::new(records, targets);
  
-     let k_fold : Option<usize> = Some(2);
- 
      // shuffle the dataset
      let shuffle : bool = true;
  
@@ -73,7 +71,7 @@ fn ann_test_xor(){
      let split_ratio : f32 = 0.7;
  
      //Create an artificial neural network using the given parameters.
-     let mut ann_restult = Evonet::new(&layers, &activations, &dataset, k_fold, shuffle, split_ratio);
+     let mut ann_restult = Evonet::new(&layers, &activations, &dataset, shuffle, split_ratio);
  
      match &mut ann_restult{
          Err(error) => panic!("Finish due to error : {}", error),
