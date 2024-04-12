@@ -43,10 +43,7 @@ fn main() {
     println!("Hello, NEUROS!");
     
     // Run XOR example 
-    ann_test_xor();
-
-    // you can either run f(x, y) = sin(x*y) example
-    // ann_test_sin();
+    ann_test_xor();   
 }
 
 #[allow(dead_code)]
