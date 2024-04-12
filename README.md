@@ -11,7 +11,7 @@ The current version suppoerts the following ANN training algorithms:
 
 [x] Growth optimizer (GO).
 
-## How to use NEUROS
+## How to use Neuros
 You can check the folder [src/bin/src](src/bin/src) for the examples.
 
 ```rust
