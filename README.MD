@@ -3,7 +3,7 @@
 [Neuros](https://github.com/SaadDAHMANI/neuros) is a [Rust](https://www.rust-lang.org/) package for Artificial (Feedforward) Neural Networks (ANNs) processing. [Neuros](https://github.com/SaadDAHMANI/neuros) uses [Sefar](https://crates.io/crates/sefar) crate to perform ANNs training. 
 
 ## Training algorithms 
-The current version includes the following algorithms for ANN training:
+The current version suppoerts the following ANN training algorithms:
 
 [x] Equilibrium Optimizer (EO), 
 
