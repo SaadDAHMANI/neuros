@@ -2,6 +2,16 @@
 
 [Neuros](https://github.com/SaadDAHMANI/neuros) is a [Rust](https://www.rust-lang.org/) package for Artificial (Feedforward) Neural Networks (ANNs) processing. [Neuros](https://github.com/SaadDAHMANI/neuros) uses [Sefar](https://crates.io/crates/sefar) crate to perform ANNs training. 
 
+In the learning (training) stage, [Neuros](https://github.com/SaadDAHMANI/neuros) minimizes the Root Mean Square Error (RMSE) between computed and given model outputs. 
+
+$Error_{Learning} = RMSE = \sqrt{\frac{1}{n}\sum_{i=1}^{n}(y_i - \hat{y}_i)^2}$ 
+
+Where $y_i$ and $\hat{y}_i$ represent the computed and given model outputs, respectively.
+
+In the case of multiple ANN outputs, [Neuros](https://github.com/SaadDAHMANI/neuros) minimizes the sum of RMSE.  
+
+$Error_{Learning} = \sum RMSE$ 
+
 ## Training algorithms 
 The current version suppoerts the following ANN training algorithms:
 
@@ -12,38 +22,47 @@ The current version suppoerts the following ANN training algorithms:
 [x] Growth optimizer (GO).
 
 ## How to use Neuros
-You can check the folder [src/bin/src](src/bin/src) for the examples.
+Please, **check the folder [src/bin/src](https://github.com/SaadDAHMANI/neuros/tree/master/src/bin/src) for the examples**.
+
+### Example (ANN with single output)
+
+1. Import dependencies:
+
+```toml
+[dependencies]
+neuros = "0.1.1"
+ndarray ="0.15.6"
+linfa ="0.7.0"
+sefar ="0.1.3"
+```
+2. In the main.rs file: 
 
 ```rust
 extern crate neuros;
-extern crate ndarray;
 extern crate linfa;
-extern crate csv;
-extern crate ndarray_csv;
+extern crate ndarray;
 extern crate sefar;
 
-//-------------------------------------------------------------------------
+use ndarray::{array, Ix2};
 use linfa::dataset::Dataset;
-//-------------------------------------------------------------------------
-use csv::ReaderBuilder;
-use ndarray::{array, Array2, Axis, Ix2};
-use ndarray_csv::Array2Reader;
-use core::panic;
-use std::error::Error;
-use std::fs::File;
+
 //--------------------------------------------------------------------------
 use neuros::{trainer::{Evonet, TrainerParams}, activations::Activations};
-use sefar::algos::go::GOparams;
 use sefar::algos::eo::EOparams;
 use sefar::algos::pso::PSOparams;
-//--------------------------------------------------------------------------
-include!("sin_example.rs");
+use sefar::algos::go::GOparams;
 //--------------------------------------------------------------------------
 fn main() {
     println!("Hello, NEUROS!");
     
-    // Run XOR example 
-    ann_test_xor();   
+    ann_test_xor();
+
+    // The code print something like :
+    //Hello, NEUROS!
+    //EO trainer : RMSE_Learning = Some(0.0001697399220037401)
+    //PSO trainer : RMSE_Learning = Some(0.020424429066646356)
+    //Growth Optimizer trainer : RMSE_Learning = Some(0.012549512112249629)
+    //Growth Optimizer trainer: Testing results = [[0.9932959284463537]] 
 }
 
 #[allow(dead_code)]
@@ -117,8 +136,10 @@ fn test_go_trainer(ann : &mut Evonet){
 
    println!("Growth Optimizer trainer : RMSE_Learning = {:?}", learning_results.best_fitness);
 
+   // perform testing using the test samples:
    let x = ann.do_testing();
-   println!("Testing results : {:?}", x);
+
+   println!("Growth Optimizer trainer: Testing results = {:?}", x);
 }
 
 ///
@@ -178,5 +199,3 @@ fn test_pso_trainer(ann : &mut Evonet){
     }  
 }
 ```
-
- 

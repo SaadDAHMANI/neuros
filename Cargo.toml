@@ -1,6 +1,6 @@
 [package]
 name = "neuros"
-version = "0.1.1"
+version = "0.1.2"
 edition = "2021"
 authors = ["Saad Dahmani <sd.dahmani2000@gmail.com>"] 
 description ="Neuros is a Rust package for Artificial (Feedforward) Neural Networks (ANNs) processing."
