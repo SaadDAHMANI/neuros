@@ -13,7 +13,7 @@ In the case of multiple ANN outputs, [Neuros](https://github.com/SaadDAHMANI/neu
 $Error_{Learning} = \sum RMSE$ 
 
 ## Training algorithms 
-The current version suppoerts the following ANN training algorithms:
+The current version supports the following training algorithms:
 
 [x] Equilibrium Optimizer (EO), 
 
