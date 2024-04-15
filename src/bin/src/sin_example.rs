@@ -59,7 +59,14 @@ fn ann_test_sin(){
                     // perform the learning step. 
                     let learning_results = ann.do_learning(&trainer_params);
 
-                    println!("Growth Optimizer trainer. Prediction of f(x,y) = sin(x*y) : RMSE_Learning = {:?}", learning_results.best_fitness);                    
+                    println!("Growth Optimizer trainer. Prediction of f(x,y) = sin(x*y) : RMSE_Learning = {:?}", learning_results.best_fitness);
+
+                    let sample = &[0.552, 0.71];
+                    let out = ann.feed_forward(sample);
+                    match out {
+                        Err(eror) => println!("Err: {:?}", eror),
+                        Ok(output) => println!("ANN computed output of {:?} is {:?} | (expected = 0.382).", sample, output),
+                    };
                 },
             };
         },
