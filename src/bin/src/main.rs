@@ -29,7 +29,7 @@ fn main() {
     ann_test_xor();
 
     // Run f(x, y) = sin(x*y) example
-    ann_test_sin();
+    //ann_test_sin();
 }
 
 #[allow(dead_code)]
@@ -65,14 +65,12 @@ fn ann_test_xor(){
              
              // Train the neural network using Equilibrium Optimizer (EO):
              test_eo_trainer(ann);
- 
+            
              // Train the neural network using Particle Swarm Optimizer (PSO):
-             test_pso_trainer(ann);
+             //test_pso_trainer(ann);
 
              // Train the neural network using Growth Optimizer (EO):
-             test_go_trainer(ann);
-
-
+             //test_go_trainer(ann);
          }
      }
 }
@@ -118,7 +116,7 @@ fn test_eo_trainer(ann : &mut Evonet){
     // define arameters for the training (learning algorithm) 
     let population_size : usize = 50; // set the search poplation size,
     let dimensions: usize = ann.get_weights_biases_count(); // get the search space dimension, 
-    let max_iterations : usize = 500; // set the maximum number of iterations (learning step),
+    let max_iterations : usize = 1000; // set the maximum number of iterations (learning step),
     let lb = vec![-5.0; dimensions]; // set the lower bound for the search space,
     let ub = vec![5.0; dimensions]; // set the upper bound for the search space,
     let a1 : f64 = 2.0; // give the value of a1 parameter (Equilibrium Optimizer),
@@ -135,6 +133,15 @@ fn test_eo_trainer(ann : &mut Evonet){
              // perform the learning step. 
             let learning_results = ann.do_learning(&trainer_params);
             println!("EO trainer : RMSE_Learning = {:?}", learning_results.best_fitness);
+
+            // compute outputs for 
+            let sample = &[0.0, 1.0];
+            let ann_out = ann.feed_forward(sample);
+            match ann_out {
+                Err(eror)=> println!("I can not compute due to : {}", eror),
+                Ok(ann_out) => println!("The output of {:?} is : {:?}", sample, ann_out),
+            }
+
         }
     }  
 }
