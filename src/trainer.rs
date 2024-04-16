@@ -196,18 +196,16 @@ impl<'a> Evonet<'a> {
     } 
 
     ///
-    /// Compute outputs for a given data inputs.
+    /// Compute outputs for given input data.
     /// 
     pub fn compute(&mut self, inputs : &[f64])-> Result<Vec<f64>, String> {
         if inputs.len() == self._record_features {
             Ok(self.neuralnetwork.feed_forward(inputs))
         }
         else {
-            Err(String::from("The lenght of inputs must be equal to the length the neural network input"))
+            Err(String::from("The length of inputs must be equal to the length of the neural network input!"))
         }
     }
-
-    
 
   /*   #[allow(dead_code)]
      fn convert22dvec(ds : &Vec<f64>)->Vec<Vec<f64>>{        

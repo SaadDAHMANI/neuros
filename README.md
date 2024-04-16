@@ -56,13 +56,6 @@ fn main() {
     println!("Hello, NEUROS!");
     
     ann_test_xor();
-
-    // The code print something like :
-    //Hello, NEUROS!
-    //EO trainer : RMSE_Learning = Some(0.0001697399220037401)
-    //PSO trainer : RMSE_Learning = Some(0.020424429066646356)
-    //Growth Optimizer trainer : RMSE_Learning = Some(0.012549512112249629)
-    //Growth Optimizer trainer: Testing results = [[0.9932959284463537]] 
 }
 
 #[allow(dead_code)]
@@ -86,8 +79,8 @@ fn ann_test_xor(){
      // shuffle the dataset
      let shuffle : bool = true;
  
-     //split the dataset into (70% learning, 30% testing) 
-     let split_ratio : f32 = 0.7;
+     //split the dataset into (80% learning, 20% testing) 
+     let split_ratio : f32 = 0.8;
  
      //Create an artificial neural network using the given parameters.
      let mut ann_restult = Evonet::new(&layers, &activations, &dataset, shuffle, split_ratio);
@@ -98,12 +91,16 @@ fn ann_test_xor(){
              
              // Train the neural network using Equilibrium Optimizer (EO):
              test_eo_trainer(ann);
+
+            println!("______________________________________________________");
  
              // Train the neural network using Particle Swarm Optimizer (PSO):
              test_pso_trainer(ann);
+             println!("______________________________________________________");
 
              // Train the neural network using Growth Optimizer (EO):
              test_go_trainer(ann);
+             println!("______________________________________________________");
          }
      }
 }
@@ -113,6 +110,9 @@ fn ann_test_xor(){
 ///   
 #[allow(dead_code)]
 fn test_go_trainer(ann : &mut Evonet){
+
+    println!("___________ANN trained by Growth Optimizer (GO)__________________");
+
     // define parameters for the training (learning algorithm) 
     let population_size : usize = 50; // set the search poplation size,
     let dimensions: usize = ann.get_weights_biases_count(); // get the search space dimension, 
@@ -133,13 +133,22 @@ fn test_go_trainer(ann : &mut Evonet){
     
     // perform the learning step. 
    let learning_results = ann.do_learning(&trainer_params);
+   
+   println!("Learning results : RMSE_Learning = {:?}", learning_results.best_fitness);
 
-   println!("Growth Optimizer trainer : RMSE_Learning = {:?}", learning_results.best_fitness);
-
-   // perform testing using the test samples:
    let x = ann.do_testing();
+   println!("Testing results = {:?}", x);
 
-   println!("Growth Optimizer trainer: Testing results = {:?}", x);
+   // Compute the output for a given input:
+   let sample = &[0.0, 0.0]; 
+
+   match ann.compute(sample){
+           Err(eror) => println!("There is an error due to : {}", eror),
+           Ok(ann_out) =>{
+               println!("The ANN output for {:?} is : {:?}", sample, ann_out);
+           },
+   };                       
+
 }
 
 ///
@@ -147,6 +156,9 @@ fn test_go_trainer(ann : &mut Evonet){
 ///   
 #[allow(dead_code)]
 fn test_eo_trainer(ann : &mut Evonet){
+
+    println!("___________ANN trained by Equilibrium Optimizer (EO)__________________");
+
     // define arameters for the training (learning algorithm) 
     let population_size : usize = 50; // set the search poplation size,
     let dimensions: usize = ann.get_weights_biases_count(); // get the search space dimension, 
@@ -167,6 +179,17 @@ fn test_eo_trainer(ann : &mut Evonet){
              // perform the learning step. 
             let learning_results = ann.do_learning(&trainer_params);
             println!("EO trainer : RMSE_Learning = {:?}", learning_results.best_fitness);
+
+             // Compute the output for a given input:
+            let sample = &[0.0, 0.0]; 
+
+            match ann.compute(sample){
+                    Err(eror) => println!("There is an error due to : {}", eror),
+                    Ok(ann_out) =>{
+                        println!("The ANN output for {:?} is : {:?}", sample, ann_out);
+                    },
+            };                     
+
         }
     }  
 }
@@ -176,6 +199,8 @@ fn test_eo_trainer(ann : &mut Evonet){
 ///   
 #[allow(dead_code)] 
 fn test_pso_trainer(ann : &mut Evonet){
+    println!("___________ANN trained by Particle Swarm Optimizer (PSO)__________________");
+
     // define arameters for the training (learning algorithm) 
     let population_size : usize = 50; // set the search poplation size,
     let dimensions: usize = ann.get_weights_biases_count(); // get the search space dimension, 
@@ -195,7 +220,17 @@ fn test_pso_trainer(ann : &mut Evonet){
              // perform the learning step. 
             let learning_results = ann.do_learning(&trainer_params);
             println!("PSO trainer : RMSE_Learning = {:?}", learning_results.best_fitness);
+             // Compute the output for a given input:
+            let sample = &[0.0, 0.0]; 
+
+            match ann.compute(sample){
+                    Err(eror) => println!("There is an error due to : {}", eror),
+                    Ok(ann_out) =>{
+                        println!("The ANN output for {:?} is : {:?}", sample, ann_out);
+                    },
+            }; 
         }
     }  
 }
 ```
+
