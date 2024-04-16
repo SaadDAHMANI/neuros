@@ -147,8 +147,7 @@ fn test_go_trainer(ann : &mut Evonet){
            Ok(ann_out) =>{
                println!("The ANN output for {:?} is : {:?}", sample, ann_out);
            },
-   };                       
-
+   };
 }
 
 ///
@@ -189,7 +188,6 @@ fn test_eo_trainer(ann : &mut Evonet){
                         println!("The ANN output for {:?} is : {:?}", sample, ann_out);
                     },
             };                     
-
         }
     }  
 }
