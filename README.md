@@ -218,7 +218,8 @@ fn test_pso_trainer(ann : &mut Evonet){
              // perform the learning step. 
             let learning_results = ann.do_learning(&trainer_params);
             println!("PSO trainer : RMSE_Learning = {:?}", learning_results.best_fitness);
-             // Compute the output for a given input:
+            
+            // Compute the output for a given input:
             let sample = &[0.0, 0.0]; 
 
             match ann.compute(sample){
