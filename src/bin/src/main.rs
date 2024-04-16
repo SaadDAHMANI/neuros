@@ -136,7 +136,7 @@ fn test_eo_trainer(ann : &mut Evonet){
 
             // compute outputs for 
             let sample = &[0.0, 1.0];
-            let ann_out = ann.feed_forward(sample);
+            let ann_out = ann.compute(sample);
             match ann_out {
                 Err(eror)=> println!("I can not compute due to : {}", eror),
                 Ok(ann_out) => println!("The output of {:?} is : {:?}", sample, ann_out),
