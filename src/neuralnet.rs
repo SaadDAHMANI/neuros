@@ -3,11 +3,11 @@ use super::activations::*;
 
 #[derive(Debug, Clone)]
 pub struct Neuralnet {
-	pub neurons:Vec<Vec<f64>>,
-	pub weights:Vec<Vec<Vec<f64>>>,
-	pub biases:Vec<Vec<f64>>,
-	pub activations:Vec<Activations>,
-	pub layers:Vec<usize>,
+	pub neurons: Vec<Vec<f64>>,
+	pub weights: Vec<Vec<Vec<f64>>>,
+	pub biases: Vec<Vec<f64>>,
+	pub activations: Vec<Activations>,
+	pub layers: Vec<usize>,
 	//pub learning_rate: f64,
 	//pub cost: f64
 
@@ -17,7 +17,7 @@ pub struct Neuralnet {
 #[allow(dead_code)]
 impl Neuralnet {
 
-	pub fn new(layers:Vec<usize>, activations:Vec<Activations>)-> Neuralnet
+	pub fn new(layers: Vec<usize>, activations: Vec<Activations>)-> Neuralnet
 	{
 		let mut nn = Neuralnet {
 			neurons: Vec::new(),

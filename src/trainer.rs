@@ -3,7 +3,7 @@ use super::activations::*;
 use super::neuralnet::*;
 
 extern crate linfa;
-use linfa::dataset::Records;
+//use linfa::dataset::Records;
 use linfa::Dataset;
 
 use ndarray::Ix2;
@@ -15,157 +15,172 @@ use sefar::algos::go::{GO, GOparams};
 use sefar::algos::eo::{EO, EOparams};
 use sefar::algos::pso::{PSO, PSOparams};
 
+
+#[derive(Debug, Clone)]
+pub struct Layer{
+    /// The number of neurons in the layer. (not null).
+   neurons : usize,
+    
+    /// The activation function of the layer.
+   activation : Activations,
+}
+
+impl Layer {
+    /// Return a new instance of the struct 'Layer'. 
+    pub fn new(neurons : usize, activation : Activations)-> Self{        
+        Self{
+            neurons : usize::max(neurons, 1),
+            activation, 
+        }
+    }
+    
+    /// Return the number of neurons in the layer.
+    pub fn get_neurons(&self)-> usize {
+        self.neurons
+    }
+
+    /// Return the activation function of the layer. 
+    pub fn get_activations(&self)-> Activations {
+        self.activation
+    }
+}
+
 ///
 /// Parameters of the training algorithm.
 /// # Arguments 
 /// 
 #[derive(Debug, Clone)]
-pub enum TrainerParams<'a>{
+pub enum TrainerParams{
 
-    /// Parameters for Equilibrium Optimizer.
-    EoParams(EOparams<'a>),
+    /// Parameters for Equilibrium Optimizer (EOs).
+    /// 
+    /// ## Example: 
+    /// 
+    /// let params : TrainerParams = TrainerParams::EoParams(50, 500, -5.0, 5.0, 2.0, 1.0, 0.5);  
+    /// 
+    /// ### here,
+    ///  
+    /// * The population size (i.e., the count of search agents) = 50,
+    /// 
+    /// * The max iterations to perform by the training algorithm = 500,
+    /// 
+    /// * The lower bound for ANN weights and biases = -5.0, 
+    /// 
+    /// * The upper bound for ANN weights and biases = 5.0,
+    /// 
+    /// * a_1 = 2.0,
+    /// 
+    /// * a_2 = 1.0,
+    /// 
+    /// * gp = 0.5.
+    EoParams(usize, usize, f64, f64, f64, f64, f64),
 
-    /// Parameters for Particle Swarm Optimizer.
-    PsoParams(PSOparams<'a>),
+    /// Parameters for Particle Swarm Optimizer (PSO).
+    /// 
+    /// /// ## Example: 
+    /// 
+    /// let params : TrainerParams = TrainerParams::PsoParams(50, 500, -5.0, 5.0, 2.0, 2.0);  
+    /// 
+    /// ### here,
+    ///  
+    /// * The population size (i.e., the count of search agents) = 50,
+    /// 
+    /// * The max iterations to perform by the training algorithm = 500,
+    /// 
+    /// * The lower bound for ANN weights and biases = -5.0, 
+    /// 
+    /// * The upper bound for ANN weights and biases = 5.0,
+    /// 
+    /// * c_1 = 2.0,
+    /// 
+    /// * c_2 = 2.0,
+    PsoParams(usize, usize, f64, f64, f64, f64),
     
     /// Parameters for Growth Optimizer.
-    GoParams(GOparams<'a>),
+    /// 
+    /// ## Example: 
+    /// 
+    /// let params : TrainerParams = TrainerParams::GoParams(50, 500, -5.0, 5.0);  
+    /// 
+    /// ### here,
+    ///  
+    /// * The population size (i.e., the count of search agents) = 50.
+    /// 
+    /// * The max iterations to perform by the training algorithm = 500.
+    /// 
+    /// * The lower bound for ANN weights and biases = -5.0. 
+    /// 
+    /// * The upper bound for ANN weights and biases = 5.0.
+    GoParams(usize, usize, f64, f64),
 }
-/// A structure defining an Evolutionary Artificial Neural Network.
-/// 
-/// # Arguments
-/// 
-/// * `dataset`: The dataset containing learning and testing samples.
-/// 
-/// * `activations`: A list of activation functions corresponding to each layer.
-/// 
-/// * `layers`: The structure of the neural network. For example, `let layers = vec![3, 10, 1]` creates an Artificial Neural Network with 3 inputs, a hidden layer with 10 neurons, and 1 output.
- 
+
+
 #[derive(Debug, Clone)]
 pub struct Evonet<'a> {
-    /// The dataset including learning and testing samples. 
-    pub dataset : &'a Dataset<f64, f64, Ix2>,
-
-    //pub k_fold : Option<usize>,
-    
-    /// A list of Activation functions, according to each layer.
-    pub activations: &'a Vec<Activations>,
-
-    /// The structure of the neural network, 
-    /// ex., [3, 10, 1] creates an Artificial Neural Network with 03 inputs,
-    /// a hidden layer with 10 neurones and 01 output.
-    ///  
-	pub layers: &'a Vec<usize>,
-
+    pub layers: &'a Vec<Layer>,
     neuralnetwork : Neuralnet,
-    learning_set : Dataset<f64, f64, Ix2>,
-    testing_set :  Dataset<f64, f64, Ix2>,
-
-    /// number of records (i.e., of samples).
-    _record_count : usize,
-
-    /// number of features in records.
-    _record_features : usize,
-
-    /// number of targets (i.e., of samples).
-    _target_count : usize,
-
-    /// number of features in targets.
-    _target_features : usize,
+    learning_set : Option<&'a Dataset<f64, f64, Ix2>>,    
 }
 
 impl<'a> Evonet<'a> {
-
     /// Create a new instance of Evonet.
     /// 
     /// # Arguments
     /// 
     /// * `layers`: A vector that specifies the structure of the artificial neural network (ANN).
-    ///   For example, `layers = vec![4, 3, 2]` creates an ANN with 4 input neurons, 3 hidden neurons, and 2 output neurons.
-    /// 
-    /// * `dataset`: A dataset containing training and testing samples. The dataset will be split according to the `split_ratio` parameter.
-    /// 
-    /// * `shuffle`: A boolean indicating whether to shuffle the dataset.
-    /// 
-    /// * `split_ratio`: The ratio used to split the dataset into learning and testing samples. For instance, `split_ratio = 0.8` means using 80% of the dataset for learning and 20% for testing.
     ///     
     #[allow(dead_code)]
-    pub fn new(layers: &'a Vec<usize>, activations :&'a Vec<Activations>, dataset : &'a Dataset<f64, f64, Ix2>, shuffle: bool, split_ratio : f32)-> Result<Evonet<'a>, String>{
-        
-        if layers.len() < 2 {
-          return Err("Layers must be greater than 1.".to_owned());
+    pub fn new(layers : &'a Vec<Layer>)-> Self {
+
+        let mut ann_layers : Vec<usize> = Vec::with_capacity(layers.len());
+        let mut activations : Vec<Activations> = Vec::with_capacity(layers.len());
+
+        for l in layers.iter(){
+            ann_layers.push(l.neurons); 
+            activations.push(l.activation);
         }
 
-        if activations.len() != layers.len() {
-            return Err("Lenghts of Activations and Layers must be equals.".to_owned());
-        }
-
-        let tmp_dataset = dataset.clone();
-         //shuffl and split data 
-         if shuffle {
-            let mut rng = rand::thread_rng();
-            tmp_dataset.shuffle(&mut rng);
-        }
-
-        let (training_set, testing_set) = tmp_dataset.split_with_ratio(split_ratio);
-                
-        let nnet : Neuralnet = Neuralnet::new(layers.clone(), activations.clone());
-
-        let (_record_count, _record_features) = dataset.records.dim();
-        let (_target_count, _target_features) = dataset.targets.dim();
-       
-        Ok (Evonet {
-           // max_iter : iterations,
-            dataset,
-            //k_fold,
-            activations,
+        let neuralnetwork : Neuralnet = Neuralnet::new(ann_layers, activations);
+        Self {
             layers,
-            neuralnetwork: nnet,
-            learning_set : training_set,
-            testing_set : testing_set,
-            _record_count,
-            _record_features,
-            _target_count, 
-            _target_features,
-        })
+            neuralnetwork,
+            learning_set : None,         
+        }
     }
 
-    /// 
-    /// Return the number of ANN weights and biases.
-    /// 
-    pub fn get_weights_biases_count(&self)->usize{
-        self.neuralnetwork.get_weights_biases_count()
-    }
-
-    ///
-    /// Conduct supervised learning utilizing the training portion of the dataset.
-    ///     
-    #[allow(dead_code)]
-    pub fn do_learning(&mut self, params : &TrainerParams) -> OptimizationResult {
+    pub fn do_learning(&mut self, params : &TrainerParams, train_dataset : &'a Dataset<f64, f64, Ix2>)-> OptimizationResult {
+        self.learning_set = Some(train_dataset);
         let wb = self.neuralnetwork.get_weights_biases_count();
-        //let lb = vec![-5.0; wb]; //Vec::new();
-        //let ub = vec![5.0; wb];
                 
-      let result =  match params{
+        let result =  match params{
             // Use EO as trainer
-            TrainerParams::EoParams(params) => {
-                let mut settings = params.clone();
+            TrainerParams::EoParams(p,k, lbv, ubv, a1, a2, gp) => {
+                let lb = vec![*lbv; wb];
+                let ub = vec![*ubv; wb];
+                let mut settings : EOparams = EOparams::new(*p, wb, *k, &lb, &ub, *a1, *a2, *gp).unwrap();
                 settings.dimensions = wb;
                 let mut algo = EO::<Evonet>::new(&settings, self);
                  algo.run()               
             },
 
             // Use POS as trainer
-            TrainerParams::PsoParams(params)=>{
-                let mut settings = params.clone();
+            TrainerParams::PsoParams(p,k, lbv, ubv, c1, c2)=>{
+                
+                let lb = vec![*lbv; wb];
+                let ub = vec![*ubv; wb];
+                let mut settings : PSOparams = PSOparams::new(*p, wb, *k, &lb, &ub, *c1, *c2).unwrap();
                 settings.dimensions = wb;
                 let mut algo = PSO::<Evonet>::new(&settings, self);
                 algo.run()
             },
 
             // Use GO as trainer
-            TrainerParams::GoParams(params) => {
-                let mut settings = params.clone();
+            TrainerParams::GoParams(p,k, lbv, ubv) => {
+
+                let lb = vec![*lbv; wb];
+                let ub = vec![*ubv; wb];
+                let mut settings : GOparams = GOparams::new(*p, wb, *k, &lb, &ub);
+
                 settings.dimensions = wb;
                 let mut algo = GO::<Evonet>::new(&settings, self);
                 algo.run()
@@ -175,90 +190,106 @@ impl<'a> Evonet<'a> {
                      
         //
         result
-    }
-    
-    ///
-    /// Perform testing using the testing part of the given dataset  
-    /// 
-    pub fn do_testing(&mut self)->Vec<Vec<f64>>{
-        let mut testing_result : Vec<Vec<f64>> = Vec::with_capacity(self.testing_set.nsamples());
 
-        for (_x, _y) in self.testing_set.sample_iter(){
-            match _x.as_slice(){
-                None =>{},
-                Some(x_vec) => {
-                    let computed =  self.neuralnetwork.feed_forward(x_vec);
-                    testing_result.push(computed);
-                },
-            };
-        }
-        testing_result
-    } 
-
-    ///
-    /// Compute outputs for given input data.
-    /// 
-    pub fn compute(&mut self, inputs : &[f64])-> Result<Vec<f64>, String> {
-        if inputs.len() == self._record_features {
-            Ok(self.neuralnetwork.feed_forward(inputs))
-        }
-        else {
-            Err(String::from("The length of inputs must be equal to the length of the neural network input!"))
-        }
     }
 
-  /*   #[allow(dead_code)]
-     fn convert22dvec(ds : &Vec<f64>)->Vec<Vec<f64>>{        
-        let mut result = vec![vec![0.0f64; 1]; ds.len()];        
-        let mut i : usize = 0;
-        for itm in ds.iter() {
-            result[i][0] = itm.clone();
-            i+=1;    
-        };                
-        result
-    } */
+    pub fn compute_outputs(&mut self, _dataset : &Dataset<f64, f64, Ix2>){
 
-}    
+    }
+
+    pub fn compute_output(&mut self, inputs : &[f64])-> Vec<f64> {
+         self.neuralnetwork.feed_forward(inputs)   
+    }
+
+    /// 
+    /// Return the number of ANN weights and biases.
+    /// 
+    pub fn get_weights_biases_count(&self)-> usize{
+        self.neuralnetwork.get_weights_biases_count()
+    }
+
+    #[allow(dead_code)]
+    pub fn save(&self, _file : &str)-> Result<(), String>{        
+        Err(String::from("not implemented yet !!"))
+    }
+
+    #[allow(dead_code)]
+    pub fn load(_file : &str)-> Result<Self, String>{
+        Err(String::from("not implemented yet !!"))
+    }
+
+}
+
+
 
 impl<'a> Problem for Evonet<'a> {
-    fn objectivefunction(&mut self, genome : &[f64])->f64 {
-                       
-         //1. Update weights and biases :
-        self.neuralnetwork.update_weights_biases(genome);
-        
-        let mut errors : Vec<f64> = vec![0.0; self._target_features];
+    fn objectivefunction(&mut self, genome : &[f64])-> f64 {
 
-        for (x, y) in self.learning_set.sample_iter(){
-            match x.as_slice() {
-                None=>{},
-                Some(x_vector)=> {
-                    let computed =  self.neuralnetwork.feed_forward(x_vector);
-                        match y.as_slice() {
-                            None => {},
-                            Some(y_vector)=> {                                  
-                                for j in 0..self._target_features{
-                                    errors[j] += (y_vector[j] - computed[j]).powi(2);
-                                }                            
-                            },
-                        };
-                    },
-                }
-            };
-            
-            // compute RMSE for learning samples for each output
-            for i in 0..self._target_features {
-                errors[i] = f64::sqrt(errors[i]/self._target_features as f64);
-            }              
+        match self.learning_set {
+            None => f64::MAX,
+            Some(learning_set)=> {
+                let target_features = learning_set.targets.dim().1;
+                 //1. Update weights and biases :
+                self.neuralnetwork.update_weights_biases(genome);
+
+                let mut errors : Vec<f64> = vec![0.0; target_features];
+
+                for (x, y) in learning_set.sample_iter(){
+                    match x.as_slice() {
+                        None=>{},
+                        Some(x_vector)=> {
+                            let computed =  self.neuralnetwork.feed_forward(x_vector);
+                                match y.as_slice() {
+                                    None => {},
+                                    Some(y_vector)=> {                                  
+                                        for j in 0..target_features{
+                                            errors[j] += (y_vector[j] - computed[j]).powi(2);
+                                        }                            
+                                   },
+                            };
+                        },
+                    }
+                };
+
+                // compute RMSE for learning samples for each output
+                for i in 0..target_features {
+                    errors[i] = f64::sqrt(errors[i]/target_features as f64);
+                }              
         
-        //learning_err = sum of RMSE errors:
-        let rmse_error : f64 = errors.iter().fold(0.0f64, |sum, a| sum + a);
-        rmse_error
+                //learning_err = sum of RMSE errors:
+                let rmse_error : f64 = errors.iter().fold(0.0f64, |sum, a| sum + a);
+                rmse_error
+            },
+        }   
     }
-    
+}
 
 
-   
 
+
+
+
+#[cfg(test)]
+mod tests {
+    //use super::*;
+    //use linfa::dataset::DatasetView;
+    //use ndarray::{Ix1, array};
+
+    use super::{Layer, Evonet, Activations};
+
+
+    #[test]
+    fn test_ann_layer_when_size_null() {
+
+        let mut layers : Vec<Layer> = Vec::new();
+        layers.push(Layer::new(4, Activations::Sigmoid));
+        layers.push(Layer::new(3, Activations::Sigmoid));
+        layers.push(Layer::new(0, Activations::Linear));
+
+        let ann = Evonet::new(&layers);
+
+        assert_eq!( ann.layers[2].neurons, 1);
+    }
 }
 
 
