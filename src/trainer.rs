@@ -117,7 +117,7 @@ pub enum TrainerParams{
 
 #[derive(Debug, Clone)]
 pub struct Evonet<'a> {
-    pub layers: &'a Vec<Layer>,
+    pub layers: Vec<Layer>,
     neuralnetwork : Neuralnet,
     learning_set : Option<&'a Dataset<f64, f64, Ix2>>,    
 }
@@ -130,7 +130,7 @@ impl<'a> Evonet<'a> {
     /// * `layers`: A vector that specifies the structure of the artificial neural network (ANN).
     ///     
     #[allow(dead_code)]
-    pub fn new(layers : &'a Vec<Layer>)-> Self {
+    pub fn new(layers : Vec<Layer>)-> Self {
 
         let mut ann_layers : Vec<usize> = Vec::with_capacity(layers.len());
         let mut activations : Vec<Activations> = Vec::with_capacity(layers.len());
@@ -146,6 +146,16 @@ impl<'a> Evonet<'a> {
             neuralnetwork,
             learning_set : None,         
         }
+    }
+    
+    pub fn empty()-> Self{
+        let layers : Vec<Layer> = Vec::new();
+        let ann : Evonet = Evonet::new(layers);
+        ann
+    }
+
+    pub fn add_layer(&mut self, layer : Layer){       
+        self.layers.push(layer);       
     }
 
     pub fn do_learning(&mut self, params : &TrainerParams, train_dataset : &'a Dataset<f64, f64, Ix2>)-> OptimizationResult {
@@ -220,8 +230,6 @@ impl<'a> Evonet<'a> {
 
 }
 
-
-
 impl<'a> Problem for Evonet<'a> {
     fn objectivefunction(&mut self, genome : &[f64])-> f64 {
 
@@ -277,7 +285,6 @@ mod tests {
 
     use super::{Layer, Evonet, Activations};
 
-
     #[test]
     fn test_ann_layer_when_size_null() {
 
@@ -286,10 +293,22 @@ mod tests {
         layers.push(Layer::new(3, Activations::Sigmoid));
         layers.push(Layer::new(0, Activations::Linear));
 
-        let ann = Evonet::new(&layers);
+        let ann = Evonet::new(layers);
 
         assert_eq!( ann.layers[2].neurons, 1);
     }
+
+    #[test]
+    fn test_add_layer_fn() {
+        let mut ann = Evonet::empty();
+        ann.add_layer(Layer::new(4, Activations::Sigmoid));
+        ann.add_layer(Layer::new(4, Activations::Sigmoid));
+        ann.add_layer(Layer::new(4, Activations::Sigmoid));
+
+        assert_eq!(ann.layers.len(), 3);
+    }
+
+
 }
 
 

@@ -44,7 +44,9 @@ fn ann_test_xor(){
      //let params : TrainerParams = TrainerParams::PsoParams(50, 500, -5.0, 5.0, 2.0, 2.0);
   
      //Create an artificial neural network using the given .
-    let mut ann = Evonet::new(&layers_struct);
+    let mut ann = Evonet::new(layers_struct);
+    ann.add_layer(Layer::new(1, Activations::Linear));
+
     let train_result = ann.do_learning(&params, &dataset);
 
     println!("The ANN train results = {}", train_result.to_string());
