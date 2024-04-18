@@ -45,6 +45,8 @@ fn ann_test_xor(){
   
      //Create an artificial neural network using the given .
     let mut ann = Evonet::new(layers_struct);
+
+    // You can use 'add_layer()' function to add layer. 
     ann.add_layer(Layer::new(1, Activations::Linear));
 
     let train_result = ann.do_learning(&params, &dataset);

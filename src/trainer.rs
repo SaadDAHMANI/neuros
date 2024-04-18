@@ -147,17 +147,47 @@ impl<'a> Evonet<'a> {
             learning_set : None,         
         }
     }
+
+    fn update_neuralnet(&mut self){
+        let mut ann_layers : Vec<usize> = Vec::with_capacity(self.layers.len());
+        let mut activations : Vec<Activations> = Vec::with_capacity(self.layers.len());
+
+        for l in self.layers.iter(){
+            ann_layers.push(l.neurons); 
+            activations.push(l.activation);
+        }
+
+        self.neuralnetwork = Neuralnet::new(ann_layers, activations);
+    }
     
+    ///
+    /// Create an empty neural network
+    /// 
     pub fn empty()-> Self{
         let layers : Vec<Layer> = Vec::new();
         let ann : Evonet = Evonet::new(layers);
         ann
     }
 
-    pub fn add_layer(&mut self, layer : Layer){       
-        self.layers.push(layer);       
+    ///
+    /// Empty the layers of the neural network.
+    /// 
+    pub fn clear_layers(&mut self){
+        self.layers.clear();
+        self.update_neuralnet();
     }
 
+    ///
+    /// add a single layer to the neural network.
+    ///   
+    pub fn add_layer(&mut self, layer : Layer){       
+        self.layers.push(layer);
+        self.update_neuralnet();       
+    }
+
+    ///
+    /// Perform ANN training
+    ///  
     pub fn do_learning(&mut self, params : &TrainerParams, train_dataset : &'a Dataset<f64, f64, Ix2>)-> OptimizationResult {
         self.learning_set = Some(train_dataset);
         let wb = self.neuralnetwork.get_weights_biases_count();
@@ -203,12 +233,17 @@ impl<'a> Evonet<'a> {
 
     }
 
-    pub fn compute_outputs(&mut self, _dataset : &Dataset<f64, f64, Ix2>){
-
+    pub fn compute_outputs(&mut self, _dataset : &Dataset<f64, f64, Ix2>)-> Result<Vec<Vec<f64>>, String>{
+         Err(String::from("Not implemented yet!"))
     }
 
-    pub fn compute_output(&mut self, inputs : &[f64])-> Vec<f64> {
-         self.neuralnetwork.feed_forward(inputs)   
+    pub fn compute_output(&mut self, inputs : &[f64])-> Result<Vec<f64>, String> {
+        if self.layers[0].neurons == inputs.len(){
+            Ok(self.neuralnetwork.feed_forward(inputs))
+        }    
+        else {    
+            Err(String::from("The lenght of inputs is not equal the size of the neural network input layer!"))
+        }         
     }
 
     /// 
@@ -274,15 +309,11 @@ impl<'a> Problem for Evonet<'a> {
 
 
 
-
-
-
 #[cfg(test)]
 mod tests {
     //use super::*;
     //use linfa::dataset::DatasetView;
     //use ndarray::{Ix1, array};
-
     use super::{Layer, Evonet, Activations};
 
     #[test]
@@ -295,8 +326,22 @@ mod tests {
 
         let ann = Evonet::new(layers);
 
-        assert_eq!( ann.layers[2].neurons, 1);
+        assert_eq!(ann.layers[2].neurons, 1);
     }
+
+    #[test]
+    fn test_2_ann_layer_when_size_null() {
+
+        let mut layers : Vec<Layer> = Vec::new();
+        layers.push(Layer::new(0, Activations::Sigmoid));
+        layers.push(Layer::new(3, Activations::Sigmoid));
+        layers.push(Layer::new(0, Activations::Linear));
+
+        let ann = Evonet::new(layers);
+
+        assert_eq!(ann.layers[0].neurons, 1);
+    }
+
 
     #[test]
     fn test_add_layer_fn() {
@@ -308,9 +353,32 @@ mod tests {
         assert_eq!(ann.layers.len(), 3);
     }
 
+    #[test]
+    fn test_ann_update_layers() {
+        let mut layers : Vec<Layer> = Vec::new();
+        layers.push(Layer::new(4, Activations::Sigmoid));
+        layers.push(Layer::new(3, Activations::Sigmoid));
+        layers.push(Layer::new(0, Activations::Linear));
 
+        let mut ann = Evonet::new(layers);
+
+        ann.add_layer(Layer::new(5, Activations::ReLU));
+        ann.add_layer(Layer::new(1, Activations::SoftMax));
+
+        assert_eq!(ann.neuralnetwork.layers.len(), 5);
+    }
+
+    #[test]
+    fn test_ann_clear_layers() {
+        let mut layers : Vec<Layer> = Vec::new();
+        layers.push(Layer::new(4, Activations::Sigmoid));
+        let mut ann = Evonet::new(layers);
+
+        ann.add_layer(Layer::new(5, Activations::ReLU));
+        ann.add_layer(Layer::new(1, Activations::SoftMax));
+
+        ann.clear_layers();
+
+        assert_eq!(ann.neuralnetwork.layers.len(), 0);
+    }
 }
-
-
-
-
