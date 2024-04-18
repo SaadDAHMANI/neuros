@@ -233,8 +233,27 @@ impl<'a> Evonet<'a> {
 
     }
 
-    pub fn compute_outputs(&mut self, _dataset : &Dataset<f64, f64, Ix2>)-> Result<Vec<Vec<f64>>, String>{
-         Err(String::from("Not implemented yet!"))
+    pub fn compute_outputs(&mut self, _dataset : &Dataset<f64, f64, Ix2>) {//-> Result<(), String>{
+        if _dataset.records.dim().1 != self.neuralnetwork.layers[0]{
+            //Err(String::from("The number of features in dataset recordes is not equal to ANN input layer!"))
+        } 
+        else {
+            let mut ann_out : Vec<Vec<f64>> = Vec::new();
+            for (x, _) in _dataset.sample_iter(){
+                match x.as_slice(){
+                    None =>{}, //Err(String::from("Not implemented yet!"))},
+                    Some(x) => {
+                        let y = self.compute_output(x);
+                        match y {
+                            Err(_err)=> {},
+                            Ok(y) => ann_out.push(y),
+                        }; 
+                    },
+                };
+            }
+        }
+        
+        //Err(String::from("Not implemented yet!"))
     }
 
     pub fn compute_output(&mut self, inputs : &[f64])-> Result<Vec<f64>, String> {
@@ -307,7 +326,7 @@ impl<'a> Problem for Evonet<'a> {
     }
 }
 
-
+//******************************************************************************************************
 
 #[cfg(test)]
 mod tests {
