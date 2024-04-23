@@ -7,7 +7,7 @@ use ndarray::{array, Ix2};
 use linfa::dataset::Dataset;
 
 //--------------------------------------------------------------------------
-use neuros::{activations::Activations, trainer::{self, EoSettings, Evonet, Layer, TrainingAlgo}};
+use neuros::{activations::Activations, trainer::{EoSettings, Evonet, Layer, TrainingAlgo}};
 //--------------------------------------------------------------------------
 fn main() {
     println!("Hello, NEUROS!");
