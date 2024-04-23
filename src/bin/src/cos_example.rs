@@ -38,11 +38,14 @@ pub fn ann_cos_test(){
             let mut ann : Evonet = Evonet::empty();
             ann.add_layer(Layer::new(records.dim().1, Activations::Sigmoid));
             ann.add_layer(Layer::new(3, Activations::Sigmoid));
-            ann.add_layer(Layer::new(2, Activations::Sigmoid));
+            //ann.add_layer(Layer::new(2, Activations::Sigmoid));
             ann.add_layer(Layer::new(targets.dim().1, Activations::Linear));
 
-            let params : EoSettings = EoSettings::new(50, 1000, -10.0, 10.0, 2.0, 1.0, 0.5);
-            let train_algo : TrainingAlgo = TrainingAlgo::EO(params);
+            //let params : EoSettings = EoSettings::new(50, 1000, -5.0, 5.0, 2.0, 1.0, 0.5);
+            //let train_algo : TrainingAlgo = TrainingAlgo::EO(params);
+
+            let params : GoSettings = GoSettings::default();
+            let train_algo : TrainingAlgo = TrainingAlgo::GO(params);
 
             let training_result = ann.do_learning(& train_algo, &train_set);
 
