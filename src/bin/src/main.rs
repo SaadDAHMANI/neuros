@@ -3,11 +3,13 @@ extern crate linfa;
 extern crate ndarray;
 extern crate sefar;
 
+use std::f64::consts::E;
+
 use ndarray::{array, Ix2};
 use linfa::dataset::Dataset;
 
 //--------------------------------------------------------------------------
-use neuros::{activations::Activations, trainer::{Evonet, Layer, TrainerParams}};
+use neuros::{activations::Activations, trainer::{Evonet, Layer, TrainingAlgo, EoSettings, PsoSettings, GoSettings}};
 //--------------------------------------------------------------------------
 fn main() {
     println!("Hello, NEUROS!");
@@ -25,31 +27,36 @@ fn ann_test_xor(){
      layers_struct.push(Layer::new(1, Activations::Linear));
 
     //Give input data samples
-     let records = array![[0.,0.], [1.,0.], [0.,1.], [1.,1.]];
+    let records = array![[0.,0.], [1.,0.], [0.,1.], [1.,1.]];
     
-     //Give output data samples
-     let targets = array![[0.], [1.], [1.], [0.]];
+    //Give output data samples
+    let targets = array![[0.], [1.], [1.], [0.]];
      
-     //Create a data set from (inputs, outputs) samples
-     let dataset : Dataset<f64, f64, Ix2> = Dataset::new(records, targets);
-
-
-     // To use Growth optimizer (GO) as ANN trainer:
-     let params : TrainerParams = TrainerParams::GoParams(50, 500, -5.0, 5.0);
-
-     // To use Equilibrium optimizer (EO) as ANN trainer:
-     //let params : TrainerParams = TrainerParams::EoParams(50, 500, -5.0, 5.0, 2.0, 1.0, 0.5);
-     
-     // To use Particle Swarm optimizer (PSO) as ANN trainer:
-     //let params : TrainerParams = TrainerParams::PsoParams(50, 500, -5.0, 5.0, 2.0, 2.0);
-  
+    //Create a data set from (inputs, outputs) samples
+    let dataset : Dataset<f64, f64, Ix2> = Dataset::new(records, targets);
+    
+    // To use Growth optimizer (GO) as ANN trainer:
+    let params : GoSettings = GoSettings::new(50,500, -5.0, 5.0);
+    //let params : GoSettings =GoSettings::default();
+    //let trainer : TrainingAlgo = TrainingAlgo::GO(params);
+   
+    // To use Equilibrium optimizer (EO) as ANN trainer:
+    let params : EoSettings = EoSettings::new(50,500, -10.0, 10.0, 2.0, 1.0, 0.5);
+    //let params : EoSettings = EoSettings::default();
+    let trainer : TrainingAlgo = TrainingAlgo::EO(params);
+   
+    // To use Particle Swarm optimizer (PSO) as ANN trainer:
+    //let params : PsoSettings = PsoSettings::new(50, 500, -10.0, 10.0, 2.0, 2.0);
+    //let trainer : TrainingAlgo = TrainingAlgo::PSO(params);
+         
+    
      //Create an artificial neural network using the given .
     let mut ann = Evonet::new(layers_struct);
 
     // You can use 'add_layer()' function to add layer. 
     ann.add_layer(Layer::new(1, Activations::Linear));
 
-    let train_result = ann.do_learning(&params, &dataset);
+    let train_result = ann.do_learning(&trainer, &dataset);
 
     println!("The ANN train results = {}", train_result.to_string());
 

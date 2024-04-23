@@ -5,8 +5,11 @@ use super::neuralnet::*;
 extern crate linfa;
 //use linfa::dataset::Records;
 use linfa::Dataset;
-
 use ndarray::Ix2;
+
+use std::default::Default; 
+use std::fmt::Display;
+
 
 extern crate sefar;
 use sefar::core::eoa::EOA;
@@ -50,68 +53,10 @@ impl Layer {
 /// # Arguments 
 /// 
 #[derive(Debug, Clone)]
-pub enum TrainerParams{
-
-    /// Parameters for Equilibrium Optimizer (EOs).
-    /// 
-    /// ## Example: 
-    /// 
-    /// let params : TrainerParams = TrainerParams::EoParams(50, 500, -5.0, 5.0, 2.0, 1.0, 0.5);  
-    /// 
-    /// ### here,
-    ///  
-    /// * The population size (i.e., the count of search agents) = 50,
-    /// 
-    /// * The max iterations to perform by the training algorithm = 500,
-    /// 
-    /// * The lower bound for ANN weights and biases = -5.0, 
-    /// 
-    /// * The upper bound for ANN weights and biases = 5.0,
-    /// 
-    /// * a_1 = 2.0,
-    /// 
-    /// * a_2 = 1.0,
-    /// 
-    /// * gp = 0.5.
-    EoParams(usize, usize, f64, f64, f64, f64, f64),
-
-    /// Parameters for Particle Swarm Optimizer (PSO).
-    /// 
-    /// /// ## Example: 
-    /// 
-    /// let params : TrainerParams = TrainerParams::PsoParams(50, 500, -5.0, 5.0, 2.0, 2.0);  
-    /// 
-    /// ### here,
-    ///  
-    /// * The population size (i.e., the count of search agents) = 50,
-    /// 
-    /// * The max iterations to perform by the training algorithm = 500,
-    /// 
-    /// * The lower bound for ANN weights and biases = -5.0, 
-    /// 
-    /// * The upper bound for ANN weights and biases = 5.0,
-    /// 
-    /// * c_1 = 2.0,
-    /// 
-    /// * c_2 = 2.0,
-    PsoParams(usize, usize, f64, f64, f64, f64),
-    
-    /// Parameters for Growth Optimizer.
-    /// 
-    /// ## Example: 
-    /// 
-    /// let params : TrainerParams = TrainerParams::GoParams(50, 500, -5.0, 5.0);  
-    /// 
-    /// ### here,
-    ///  
-    /// * The population size (i.e., the count of search agents) = 50.
-    /// 
-    /// * The max iterations to perform by the training algorithm = 500.
-    /// 
-    /// * The lower bound for ANN weights and biases = -5.0. 
-    /// 
-    /// * The upper bound for ANN weights and biases = 5.0.
-    GoParams(usize, usize, f64, f64),
+pub enum TrainingAlgo{
+    EO(EoSettings),  
+    PSO(PsoSettings),
+    GO(GoSettings),
 }
 
 
@@ -184,44 +129,40 @@ impl<'a> Evonet<'a> {
         self.layers.push(layer);
         self.update_neuralnet();       
     }
-
+       
     ///
     /// Perform ANN training
     ///  
-    pub fn do_learning(&mut self, params : &TrainerParams, train_dataset : &'a Dataset<f64, f64, Ix2>)-> OptimizationResult {
+    pub fn do_learning(&mut self, params : &TrainingAlgo, train_dataset : &'a Dataset<f64, f64, Ix2>)-> OptimizationResult {
         self.learning_set = Some(train_dataset);
         let wb = self.neuralnetwork.get_weights_biases_count();
                 
         let result =  match params{
             // Use EO as trainer
-            TrainerParams::EoParams(p,k, lbv, ubv, a1, a2, gp) => {
-                let lb = vec![*lbv; wb];
-                let ub = vec![*ubv; wb];
-                let mut settings : EOparams = EOparams::new(*p, wb, *k, &lb, &ub, *a1, *a2, *gp).unwrap();
-                settings.dimensions = wb;
+            &TrainingAlgo::EO(stng) => {
+                let lb = vec![stng.lower_bound; wb];
+                let ub = vec![stng.upper_bound; wb];
+                let settings : EOparams = EOparams::new(stng.pop_size, wb, stng.max_iter, &lb, &ub, stng.a1, stng.a2, stng.gp).unwrap();
                 let mut algo = EO::<Evonet>::new(&settings, self);
                  algo.run()               
             },
 
             // Use POS as trainer
-            TrainerParams::PsoParams(p,k, lbv, ubv, c1, c2)=>{
-                
-                let lb = vec![*lbv; wb];
-                let ub = vec![*ubv; wb];
-                let mut settings : PSOparams = PSOparams::new(*p, wb, *k, &lb, &ub, *c1, *c2).unwrap();
-                settings.dimensions = wb;
+            &TrainingAlgo::PSO(stng)=>{
+                let lb = vec![stng.lower_bound; wb];
+                let ub = vec![stng.upper_bound; wb];
+                let settings : PSOparams = PSOparams::new(stng.pop_size, wb ,stng.max_iter,
+                    &lb, &ub, stng.c1, stng.c2).unwrap();
                 let mut algo = PSO::<Evonet>::new(&settings, self);
                 algo.run()
             },
 
             // Use GO as trainer
-            TrainerParams::GoParams(p,k, lbv, ubv) => {
-
-                let lb = vec![*lbv; wb];
-                let ub = vec![*ubv; wb];
-                let mut settings : GOparams = GOparams::new(*p, wb, *k, &lb, &ub);
-
-                settings.dimensions = wb;
+            &TrainingAlgo::GO(stng) => {
+                let lb = vec![stng.lower_bound; wb];
+                let ub = vec![stng.upper_bound; wb];
+                let settings : GOparams = GOparams::new(stng.pop_size, wb ,stng.max_iter, &lb, &ub);
+           
                 let mut algo = GO::<Evonet>::new(&settings, self);
                 algo.run()
                  
@@ -323,6 +264,196 @@ impl<'a> Problem for Evonet<'a> {
                 rmse_error
             },
         }   
+    }
+}
+
+
+/// Parameters for Equilibrium Optimizer (EO).
+    /// 
+    /// ## Example: 
+    /// 
+    /// let eo_params : EoSettings = EoSettings::new(50,500, -5.0, 5.0, 2.0, 1.0, 0.5); 
+    /// 
+    /// ### here,
+    ///  
+    /// * The population size (i.e., the count of search agents) = 50,
+    /// 
+    /// * The max iterations to perform by the training algorithm = 500,
+    /// 
+    /// * The lower bound for ANN weights and biases = -5.0, 
+    /// 
+    /// * The upper bound for ANN weights and biases = 5.0,
+    /// 
+    /// * a_1 = 2.0,
+    /// 
+    /// * a_2 = 1.0,
+    /// 
+    /// * gp = 0.5.
+    /// 
+#[derive(Debug, Clone, Copy)]
+pub struct EoSettings{
+    pub pop_size : usize,
+    pub max_iter : usize,
+    pub lower_bound : f64,
+    pub upper_bound : f64,
+    pub a1 : f64,
+    pub a2 : f64,
+    pub gp : f64,
+}
+
+impl EoSettings {
+    pub fn new(pop_size : usize, max_iter : usize, lower_bound : f64, upper_bound : f64,
+        a1 : f64, a2 : f64, gp : f64)-> Self {        
+        Self { 
+            pop_size,
+            max_iter,
+            lower_bound,
+            upper_bound,
+            a1,
+            a2,
+            gp
+        }
+    }
+}
+
+impl Default for EoSettings{
+
+     /// ## Return default parameters
+    ///  
+    /// * The population size (i.e., the count of search agents) = 50,
+    /// 
+    /// * The max iterations to perform by the training algorithm = 500,
+    /// 
+    /// * The lower bound for ANN weights and biases = -5.0, 
+    /// 
+    /// * The upper bound for ANN weights and biases = 5.0,
+    /// 
+    /// * a_1 = 2.0,
+    /// 
+    /// * a_2 = 1.0,
+    /// 
+    /// * gp = 0.5,
+    /// 
+    fn default() -> Self {
+        Self{
+            pop_size : 50,
+            max_iter : 500,
+            lower_bound : -5.0,
+            upper_bound : 5.0,
+            a1 : 2.0,
+            a2 : 1.0,
+            gp : 0.5,
+        }
+    }
+}
+
+impl Display for EoSettings{
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "N: {}, Max_iter: {}, lb: {}, ub: {}, a1: {}, a2: {}, gp: {}", 
+        self.pop_size,  self.max_iter, self.lower_bound, self.upper_bound, self.a1, self.a2, self.gp)
+    }
+}
+
+/// Parameters for Growth Optimizer.
+/// 
+/// ## Example: 
+/// 
+/// let params : TrainerParams = TrainerParams::GoParams(50, 500, -5.0, 5.0);  
+/// 
+/// ### here,
+///  
+/// * The population size (i.e., the count of search agents) = 50.
+/// 
+/// * The max iterations to perform by the training algorithm = 500.
+/// 
+/// * The lower bound for ANN weights and biases = -5.0. 
+/// 
+/// * The upper bound for ANN weights and biases = 5.0.
+  
+#[derive(Debug, Clone, Copy)]
+pub struct GoSettings{
+    pub pop_size : usize,
+    pub max_iter : usize,
+    pub lower_bound : f64,
+    pub upper_bound : f64,    
+}
+impl GoSettings{
+    pub fn new(pop_size : usize,
+        max_iter : usize,
+        lower_bound : f64,
+        upper_bound : f64)->Self{
+        Self{
+            pop_size,
+            max_iter,
+            lower_bound,
+            upper_bound 
+        }
+    }
+}
+
+impl Default for GoSettings{
+    fn default() -> Self {
+        Self{
+            pop_size : 50,
+            max_iter : 500,
+            lower_bound : -5.0,
+            upper_bound : 5.0, 
+        }
+    }   
+}
+
+/// Parameters for Particle Swarm Optimizer (PSO).
+    /// 
+    /// /// ## Example: 
+    /// 
+    /// let params : TrainerParams = TrainerParams::PsoParams(50, 500, -5.0, 5.0, 2.0, 2.0);  
+    /// 
+    /// ### here,
+    ///  
+    /// * The population size (i.e., the count of search agents) = 50,
+    /// 
+    /// * The max iterations to perform by the training algorithm = 500,
+    /// 
+    /// * The lower bound for ANN weights and biases = -5.0, 
+    /// 
+    /// * The upper bound for ANN weights and biases = 5.0,
+    /// 
+    /// * c_1 = 2.0,
+    /// 
+    /// * c_2 = 2.0,
+#[derive(Debug, Clone, Copy)]
+    pub struct PsoSettings{
+    pub pop_size : usize,
+    pub max_iter : usize,
+    pub lower_bound : f64,
+    pub upper_bound : f64,
+    pub c1 : f64,
+    pub c2 : f64,
+}
+impl PsoSettings{
+    pub fn new(pop_size : usize, max_iter : usize, lower_bound : f64, upper_bound : f64,
+        c1 : f64, c2 : f64)-> Self{        
+        Self { 
+            pop_size,
+            max_iter,
+            lower_bound,
+            upper_bound,
+            c1,
+            c2,
+        }
+    }
+}
+
+impl Default for PsoSettings{
+    fn default() -> Self {
+        Self { 
+            pop_size : 50,
+            max_iter : 500,
+            lower_bound : -5.0,
+            upper_bound : 5.0,
+            c1 : 2.0,
+            c2 : 2.0,
+        }
     }
 }
 
