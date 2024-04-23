@@ -44,8 +44,8 @@ fn ann_test_xor(){
     let trainer : TrainingAlgo = TrainingAlgo::EO(params);
    
     // To use Particle Swarm optimizer (PSO) as ANN trainer:
-    //let params : PsoSettings = PsoSettings::new(50, 500, -10.0, 10.0, 2.0, 2.0);
-    //let trainer : TrainingAlgo = TrainingAlgo::PSO(params);
+    let params : PsoSettings = PsoSettings::new(50, 500, -10.0, 10.0, 2.0, 2.0);
+    let trainer : TrainingAlgo = TrainingAlgo::PSO(params);
          
     
      //Create an artificial neural network using the given .
