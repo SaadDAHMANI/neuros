@@ -1,8 +1,17 @@
 // This code demonstrates how to utilize the Neuros crate to predict the output 
 // of the function f(x,y) = sin(x*y).
 
+use ndarray::{Ix2, Axis}; 
+use linfa::Dataset;
+
+
+use ndarray_csv::Array2Reader;
+use neuros::activations::Activations;
+use neuros::trainer::*;
+
+
 #[allow(dead_code)]
-fn ann_test_sin(){
+pub fn ann_sin_test(){
 
     let path = "src/bin/src/data/sin_xy.csv";
     //--------------------------
@@ -20,69 +29,52 @@ fn ann_test_sin(){
             ////Create a data set from (inputs, outputs) samples
             let dataset : Dataset<f64, f64, Ix2> = Dataset::new(records.to_owned(),targets.to_owned());
            
-            // shuffle the dataset
-            let shuffle : bool = true;
-        
+                    
             //split the dataset into (80% learning, 20% testing) 
-            let split_ratio : f32 = 0.8;
+            let split_ratio : f32 = 0.8;            
+            
+            let (train_set, test_set) = dataset.split_with_ratio(split_ratio);
            
             // Give the ANN structure. 
-            let layers = [2, 3, 1].to_vec();
+            let mut ann : Evonet = Evonet::empty();
+            ann.add_layer(Layer::new(records.dim().1, Activations::Sigmoid));
+            ann.add_layer(Layer::new(4, Activations::Sigmoid));
+            ann.add_layer(Layer::new(targets.dim().1, Activations::Linear));
 
-            // //Give activation function for each layer.
-            let activations = [Activations::Sigmoid, Activations::Sigmoid, Activations::Linear].to_vec();
- 
-            //Create an artificial neural network using the given parameters.
-            let mut ann_restult = Evonet::new(&layers, &activations, &dataset, shuffle, split_ratio);
-            
-            match &mut ann_restult{
-                Err(error) => panic!("Finish due to error : {}", error),
-                Ok(ann)=>{
-                    // define parameters for the training (learning algorithm) 
-                    let population_size : usize = 50; // set the search poplation size,
-                    let dimensions: usize = ann.get_weights_biases_count(); // get the search space dimension, 
-                    let max_iterations : usize = 500; // set the maximum number of iterations (learning step),
-                    let lb = vec![-5.0; dimensions]; // set the lower bound for the search space,
-                    let ub = vec![5.0; dimensions]; // set the upper bound for the search space,
+            let train_algo : TrainingAlgo = TrainingAlgo::EO(EoSettings::default());
 
-                    // create the GO parameters (+learning algorithm)
-                    let params : GOparams = GOparams {
-                        population_size,
-                        dimensions,
-                        max_iterations,
-                        lower_bounds: &lb, 
-                        upper_bounds : &ub,
-                    };  
+            let training_result = ann.do_learning(& train_algo, &train_set);
 
-                    let trainer_params = TrainerParams::GoParams(params); 
-    
-                    // perform the learning step. 
-                    let learning_results = ann.do_learning(&trainer_params);
+            println!("Training results : {:?}", training_result);
 
-                    println!("Growth Optimizer trainer. Prediction of f(x,y) = sin(x*y) : RMSE_Learning = {:?}", learning_results.best_fitness);
+            let learning_out = ann.compute_outputs(&train_set); 
 
-                    let sample = &[0.552, 0.71];
-                    let out = ann.compute(sample);
-                    match out {
-                        Err(eror) => println!("Err: {:?}", eror),
-                        Ok(output) => println!("ANN computed output of {:?} is {:?} | (expected = 0.382).", sample, output),
-                    };
-                },
-            };
+            match learning_out {
+                Err(eror)=> println!("No result, due to : {}", eror),
+                Ok(ann_out)=>{
+                    
+                    for (computed, expected) in ann_out.iter().zip(train_set.targets().iter()) {
+                        println!("Computed: {:?}, Expected : {:?}", computed, expected);
+                    } 
+                }
+            }
+
+
         },
-    };
+    }
+
+
 }
 
 ///
 /// Read data from CSV file
 /// path : csv file path 
 /// 
-fn read_csv_file(path : &str)-> Result<Array2<f64>, Box<dyn Error>>{
+fn read_csv_file(path : &str)-> Result<ndarray::Array2<f64>, Box<dyn std::error::Error>>{
     // Read an array back from the file
-    let file = File::open(path)?;
-    let mut reader = ReaderBuilder::new().has_headers(true).from_reader(file);
+    let file = std::fs::File::open(path)?;
+    let mut reader = csv::ReaderBuilder::new().has_headers(true).from_reader(file);
     //let array_read: Array2<u64> = reader.deserialize_array2((2, 3))?;
-    let array_read: Array2<f64> = reader.deserialize_array2_dynamic()?;
-
+    let array_read: ndarray::Array2<f64> = reader.deserialize_array2_dynamic()?;
     Ok(array_read)
 }

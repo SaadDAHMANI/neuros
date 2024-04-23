@@ -6,17 +6,24 @@ extern crate sefar;
 use ndarray::{array, Ix2};
 use linfa::dataset::Dataset;
 
-//--------------------------------------------------------------------------
+mod sin_example;
+
+
+//------------------------------------------------------------------------------------------
 use neuros::{activations::Activations, trainer::{EoSettings, Evonet, Layer, TrainingAlgo}};
-//--------------------------------------------------------------------------
+
+use crate::sin_example::ann_sin_test;
+//------------------------------------------------------------------------------------------
 fn main() {
     println!("Hello, NEUROS!");
     
-    ann_test_xor();
+    //ann_xor_test();
+
+    ann_sin_test();
 }
 
 #[allow(dead_code)]
-fn ann_test_xor(){
+fn ann_xor_test(){
 
      // Give the ANN structure. 
      let mut layers_struct : Vec<Layer> = Vec::new();

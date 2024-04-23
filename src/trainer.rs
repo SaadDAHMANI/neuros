@@ -133,11 +133,11 @@ impl<'a> Evonet<'a> {
     ///
     /// Perform ANN training
     ///  
-    pub fn do_learning(&mut self, params : &TrainingAlgo, train_dataset : &'a Dataset<f64, f64, Ix2>)-> OptimizationResult {
+    pub fn do_learning(&mut self, train_algo : &TrainingAlgo, train_dataset : &'a Dataset<f64, f64, Ix2>)-> OptimizationResult {
         self.learning_set = Some(train_dataset);
         let wb = self.neuralnetwork.get_weights_biases_count();
                 
-        let result =  match params{
+        let result =  match train_algo {
             // Use EO as trainer
             &TrainingAlgo::EO(stng) => {
                 let lb = vec![stng.lower_bound; wb];
@@ -174,13 +174,13 @@ impl<'a> Evonet<'a> {
 
     }
 
-    pub fn compute_outputs(&mut self, _dataset : &Dataset<f64, f64, Ix2>) {//-> Result<(), String>{
-        if _dataset.records.dim().1 != self.neuralnetwork.layers[0]{
-            //Err(String::from("The number of features in dataset recordes is not equal to ANN input layer!"))
+    pub fn compute_outputs(&mut self, dataset : &Dataset<f64, f64, Ix2>)-> Result<Vec<Vec<f64>>, crate::Error>{
+        if dataset.records.dim().1 != self.neuralnetwork.layers[0]{
+            Err(crate::Error::InvalidInputCount { expected: self.neuralnetwork.layers[0], actual: dataset.records.dim().1})
         } 
         else {
             let mut ann_out : Vec<Vec<f64>> = Vec::new();
-            for (x, _) in _dataset.sample_iter(){
+            for (x, _) in dataset.sample_iter(){
                 match x.as_slice(){
                     None =>{}, //Err(String::from("Not implemented yet!"))},
                     Some(x) => {
@@ -191,10 +191,9 @@ impl<'a> Evonet<'a> {
                         }; 
                     },
                 };
-            }
+            };
+            Ok(ann_out)
         }
-        
-        //Err(String::from("Not implemented yet!"))
     }
 
     pub fn compute_output(&mut self, inputs : &[f64])-> Result<Vec<f64>, String> {
