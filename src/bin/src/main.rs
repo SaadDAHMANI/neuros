@@ -3,8 +3,6 @@ extern crate linfa;
 extern crate ndarray;
 extern crate sefar;
 
-use std::f64::consts::E;
-
 use ndarray::{array, Ix2};
 use linfa::dataset::Dataset;
 

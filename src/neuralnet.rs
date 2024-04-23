@@ -19,7 +19,7 @@ impl Neuralnet {
 
 	pub fn new(layers: Vec<usize>, activations: Vec<Activations>)-> Neuralnet
 	{
-		let mut nn = Neuralnet {
+		let mut nn = Self {
 			neurons: Vec::new(),
 			weights: Vec::new(),
 			biases: Vec::new(),
