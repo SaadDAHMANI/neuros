@@ -31,21 +31,22 @@ pub fn ann_sin_test(){
            
                     
             //split the dataset into (80% learning, 20% testing) 
-            let split_ratio : f32 = 0.8;            
+            let split_ratio : f32 = 0.9;            
             
             let (train_set, test_set) = dataset.split_with_ratio(split_ratio);
            
             // Give the ANN structure. 
             let mut ann : Evonet = Evonet::empty();
             ann.add_layer(Layer::new(records.dim().1, Activations::Sigmoid));
-            ann.add_layer(Layer::new(4, Activations::Sigmoid));
+            ann.add_layer(Layer::new(5, Activations::Sigmoid));
             ann.add_layer(Layer::new(targets.dim().1, Activations::Linear));
 
-            let train_algo : TrainingAlgo = TrainingAlgo::EO(EoSettings::default());
+            let params : EoSettings = EoSettings::new(50, 1000, -10.0, 10.0, 2.0, 1.0, 0.5);
+            let train_algo : TrainingAlgo = TrainingAlgo::EO(params);
 
             let training_result = ann.do_learning(& train_algo, &train_set);
 
-            println!("Training results : {:?}", training_result);
+            println!("Training results : {:?}", training_result.best_fitness);
 
             let learning_out = ann.compute_outputs(&train_set); 
 
@@ -54,12 +55,22 @@ pub fn ann_sin_test(){
                 Ok(ann_out)=>{
                     
                     for (computed, expected) in ann_out.iter().zip(train_set.targets().iter()) {
-                        println!("Computed: {:?}, Expected : {:?}", computed, expected);
+                        println!("computed: {:?}, expected : {:?}", computed, expected);
                     } 
                 }
-            }
+            };
 
+            let testing_out = ann.compute_outputs(&test_set);
 
+            match testing_out {
+                Err(eror) => println!("No result, due to : {}", eror),
+                Ok(ann_out)=>{
+                    
+                    for (computed, expected) in ann_out.iter().zip(test_set.targets().iter()) {
+                        println!("Test -> computed: {:?}, expected : {:?}", computed, expected);
+                    } 
+                }
+            };
         },
     }
 
