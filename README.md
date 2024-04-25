@@ -1,6 +1,6 @@
 # Neuros
 
-[Neuros](https://github.com/SaadDAHMANI/neuros) is a [Rust](https://www.rust-lang.org/) package for Artificial (Feedforward) Neural Networks (ANNs) processing. [Neuros](https://github.com/SaadDAHMANI/neuros) uses [Sefar](https://crates.io/crates/sefar) crate to perform ANNs training. 
+[Neuros](https://github.com/SaadDAHMANI/neuros) is a simple [Rust](https://www.rust-lang.org/) package for Artificial (Feedforward) Neural Networks (ANNs) processing. [Neuros](https://github.com/SaadDAHMANI/neuros) uses [Sefar](https://crates.io/crates/sefar) crate to perform ANNs training. 
 
 In the learning (training) stage, [Neuros](https://github.com/SaadDAHMANI/neuros) minimizes the Root Mean Square Error (RMSE) between computed and given model outputs. 
 
@@ -23,20 +23,3 @@ The current version supports the following training algorithms:
 
 ## How to use Neuros
 Please, **check the folder [src/bin/src](https://github.com/SaadDAHMANI/neuros/tree/master/src/bin/src) for the examples**.
-
-### Example (ANN with single output)
-
-1. Import dependencies:
-
-```toml
-[dependencies]
-neuros = "0.1.1"
-ndarray ="0.15.6"
-linfa ="0.7.0"
-```
-2. In the main.rs file: 
-
-```rust
-
-```
-
