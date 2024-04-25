@@ -46,6 +46,16 @@ impl Layer {
     pub fn get_activations(&self)-> Activations {
         self.activation
     }
+
+    /// Update neuron count of the layer.
+    pub fn update_neurons(&mut self, new_neuron_count : usize){
+        self.neurons = usize::max(new_neuron_count,1);
+    }
+
+    /// Update the activation function of the layer.
+    pub fn update_activation(&mut self, new_activation : Activations){
+        self.activation = new_activation;
+    }
 }
 
 ///
