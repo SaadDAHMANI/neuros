@@ -3,6 +3,7 @@ use super::activations::*;
 use super::neuralnet::*;
 
 extern crate linfa;
+
 //use linfa::dataset::Records;
 use linfa::Dataset;
 use ndarray::Ix2;
@@ -160,19 +161,29 @@ impl<'a> Evonet<'a> {
             &TrainingAlgo::EO(stng) => {
                 let lb = vec![stng.lower_bound; wb];
                 let ub = vec![stng.upper_bound; wb];
-                let settings : EOparams = EOparams::new(stng.pop_size, wb, stng.max_iter, &lb, &ub, stng.a1, stng.a2, stng.gp).unwrap();
-                let mut algo = EO::<Evonet>::new(&settings, self);
-                 algo.run()               
+                let settings = EOparams::new(stng.pop_size, wb, stng.max_iter, &lb, &ub, stng.a1, stng.a2, stng.gp);
+                
+                match settings {
+                    Err(eror) => OptimizationResult::get_none(eror),
+                    Ok(settings) => {
+                        let mut algo = EO::<Evonet>::new(&settings, self);
+                        algo.run()     
+                    },
+                }          
             },
 
             // Use POS as trainer
             &TrainingAlgo::PSO(stng)=>{
                 let lb = vec![stng.lower_bound; wb];
                 let ub = vec![stng.upper_bound; wb];
-                let settings : PSOparams = PSOparams::new(stng.pop_size, wb ,stng.max_iter,
-                    &lb, &ub, stng.c1, stng.c2).unwrap();
-                let mut algo = PSO::<Evonet>::new(&settings, self);
-                algo.run()
+                let settings = PSOparams::new(stng.pop_size, wb ,stng.max_iter, &lb, &ub, stng.c1, stng.c2);
+                match settings {
+                    Err(eror) => OptimizationResult::get_none(eror),
+                    Ok(settings) => {
+                        let mut algo = PSO::<Evonet>::new(&settings, self);
+                        algo.run()
+                    },
+                }               
             },
 
             // Use GO as trainer
@@ -194,7 +205,7 @@ impl<'a> Evonet<'a> {
 
     pub fn compute_outputs(&mut self, dataset : &Dataset<f64, f64, Ix2>)-> Result<Vec<Vec<f64>>, crate::Error>{
         if dataset.records.dim().1 != self.neuralnetwork.layers[0]{
-            Err(crate::Error::InvalidInputCount { expected: self.neuralnetwork.layers[0], actual: dataset.records.dim().1})
+            Err(crate::Error::InvalidInputCount{expected: self.neuralnetwork.layers[0], actual: dataset.records.dim().1})
         } 
         else {
             let mut ann_out : Vec<Vec<f64>> = Vec::new();
