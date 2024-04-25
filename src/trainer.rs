@@ -30,6 +30,8 @@ pub struct Layer{
 
 impl Layer {
     /// Return a new instance of the struct 'Layer'. 
+    /// 'neurons' : The number of neurons in the layer. (not null).
+    /// 'activation' : The activation function of the layer.
     pub fn new(neurons : usize, activation : Activations)-> Self{        
         Self{
             neurons : usize::max(neurons, 1),
@@ -116,7 +118,7 @@ impl<'a> Evonet<'a> {
     }
     
     ///
-    /// Create an empty neural network
+    /// Create an empty neural network.
     /// 
     pub fn empty()-> Self{
         let layers : Vec<Layer> = Vec::new();
@@ -133,7 +135,7 @@ impl<'a> Evonet<'a> {
     }
 
     ///
-    /// add a single layer to the neural network.
+    /// Add a single layer to the neural network.
     ///   
     pub fn add_layer(&mut self, layer : Layer){       
         self.layers.push(layer);
@@ -141,7 +143,13 @@ impl<'a> Evonet<'a> {
     }
        
     ///
-    /// Perform ANN training
+    /// Perform ANN training.
+    /// 
+    ///  # Arguments
+    ///  
+    /// * 'train_algo' : A training algorithm and its parameter.
+    /// 
+    /// * 'train_dataset' : A data set to train the ANN.
     ///  
     pub fn do_learning(&mut self, train_algo : &TrainingAlgo, train_dataset : &'a Dataset<f64, f64, Ix2>)-> OptimizationResult {
         self.learning_set = Some(train_dataset);
@@ -486,6 +494,14 @@ mod tests {
         let ann = Evonet::new(layers);
 
         assert_eq!(ann.layers[2].neurons, 1);
+    }
+
+    #[test]
+    fn test_update_neurons_when_null(){
+        let mut l : Layer = Layer::new(10, Activations::SoftMax);
+        l.update_neurons(0);
+
+        assert_eq!(l.neurons, 1);
     }
 
     #[test]
