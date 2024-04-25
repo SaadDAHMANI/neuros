@@ -319,16 +319,34 @@ pub struct EoSettings{
 }
 
 impl EoSettings {
+    ///
+    /// Return new instance of EoSettings
+    /// # Arguments 
+    /// 
+    /// * 'pop_size' : Number of search agents used by the learning algorithm.
+    /// 
+    /// * 'max_iter' : Maximum iteration to perform by the learning algorithm.
+    /// 
+    /// * 'lower_bound' : The minimum value can be set to a ANN weight or bias.
+    /// 
+    /// * 'lower_bound' : The maximum value can be set to a ANN weight or bias.
+    /// 
+    /// * 'a1' : EO parameter.
+    /// 
+    /// * 'a2' : EO parameter.
+    /// 
+    /// * 'gp' : EO parameter.
+    ///  
     pub fn new(pop_size : usize, max_iter : usize, lower_bound : f64, upper_bound : f64,
         a1 : f64, a2 : f64, gp : f64)-> Self {        
         Self { 
-            pop_size,
+            pop_size : usize::max(pop_size, 5),
             max_iter,
-            lower_bound,
-            upper_bound,
+            lower_bound : f64::min(lower_bound, upper_bound),
+            upper_bound : f64::max(lower_bound, upper_bound),
             a1,
             a2,
-            gp
+            gp,
         }
     }
 }
@@ -395,15 +413,25 @@ pub struct GoSettings{
     pub upper_bound : f64,    
 }
 impl GoSettings{
-    pub fn new(pop_size : usize,
-        max_iter : usize,
-        lower_bound : f64,
-        upper_bound : f64)->Self{
+    ///
+    /// Return new instance of GoSettings
+    /// 
+    /// # Arguments 
+    /// 
+    /// * 'pop_size' : Number of search agents used by the learning algorithm.
+    /// 
+    /// * 'max_iter' : Maximum iteration to perform by the learning algorithm.
+    /// 
+    /// * 'lower_bound' : The minimum value can be set to a ANN weight or bias.
+    /// 
+    /// * 'lower_bound' : The maximum value can be set to a ANN weight or bias.
+    /// 
+    pub fn new(pop_size : usize, max_iter : usize, lower_bound : f64, upper_bound : f64)->Self{
         Self{
-            pop_size,
+            pop_size : usize::max(pop_size, 5),
             max_iter,
-            lower_bound,
-            upper_bound 
+            lower_bound : f64::min(lower_bound,upper_bound),
+            upper_bound : f64::max(lower_bound,upper_bound) 
         }
     }
 }
@@ -448,8 +476,24 @@ impl Default for GoSettings{
     pub c2 : f64,
 }
 impl PsoSettings{
-    pub fn new(pop_size : usize, max_iter : usize, lower_bound : f64, upper_bound : f64,
-        c1 : f64, c2 : f64)-> Self{        
+    ///
+    /// Return new instance of PsoSettings
+    /// 
+    /// # Arguments 
+    /// 
+    /// * 'pop_size' : Number of search agents used by the learning algorithm.
+    /// 
+    /// * 'max_iter' : Maximum iteration to perform by the learning algorithm.
+    /// 
+    /// * 'lower_bound' : The minimum value can be set to a ANN weight or bias.
+    /// 
+    /// * 'lower_bound' : The maximum value can be set to a ANN weight or bias.
+    /// 
+    /// * 'c1' : PSO parameter.
+    /// 
+    /// * 'c2' : PSO parameter.
+    /// 
+    pub fn new(pop_size : usize, max_iter : usize, lower_bound : f64, upper_bound : f64, c1 : f64, c2 : f64)-> Self{        
         Self { 
             pop_size,
             max_iter,
