@@ -259,7 +259,9 @@ impl<'a> Problem for Evonet<'a> {
         match self.learning_set {
             None => f64::MAX,
             Some(learning_set)=> {
+                let sample_count = learning_set.targets.dim().0 as f64 ;
                 let target_features = learning_set.targets.dim().1;
+
                  //1. Update weights and biases :
                 self.neuralnetwork.update_weights_biases(genome);
 
@@ -284,7 +286,7 @@ impl<'a> Problem for Evonet<'a> {
 
                 // compute RMSE for learning samples for each output
                 for i in 0..target_features {
-                    errors[i] = f64::sqrt(errors[i]/target_features as f64);
+                    errors[i] = f64::sqrt(errors[i]/ sample_count);
                 }              
         
                 //learning_err = sum of RMSE errors:

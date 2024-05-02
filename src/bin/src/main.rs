@@ -8,20 +8,23 @@ use linfa::dataset::Dataset;
 
 mod sin_example;
 mod cos_example;
+mod cv_example;
 
 //------------------------------------------------------------------------------------------
 use neuros::{activations::Activations, trainer::{self, EoSettings, Evonet, Layer, TrainingAlgo}};
 
-use crate::sin_example::ann_sin_test;
+use crate::{cv_example::ann_sin_test_cross_valid, sin_example::ann_sin_test};
 //use crate::cos_example::ann_cos_test;
 
 //------------------------------------------------------------------------------------------
 fn main() {
     println!("Hello, NEUROS!");
     
+    ann_sin_test_cross_valid();
+    
     //ann_xor_test();
 
-     ann_sin_test();
+     //ann_sin_test();
 
     //ann_cos_test();
 }
