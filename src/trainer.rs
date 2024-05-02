@@ -285,8 +285,8 @@ impl<'a> Problem for Evonet<'a> {
                 };
 
                 // compute RMSE for learning samples for each output
-                for i in 0..target_features {
-                    errors[i] = f64::sqrt(errors[i]/ sample_count);
+                for j in 0..target_features {
+                    errors[j] = f64::sqrt(errors[j]/ sample_count);
                 }              
         
                 //learning_err = sum of RMSE errors:
