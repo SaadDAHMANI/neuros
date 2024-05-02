@@ -207,9 +207,12 @@ impl<'a> Evonet<'a> {
             },
             Some(vec_wb)=> {
                 self.neuralnetwork.update_weights_biases(&vec_wb.genes);
+                println!("[W, b] = {:?}", vec_wb);
             },
         };
-                                                                        
+
+       
+
         //
         result
 
@@ -220,6 +223,10 @@ impl<'a> Evonet<'a> {
             Err(crate::Error::InvalidInputCount{expected: self.neuralnetwork.layers[0], actual: dataset.records.dim().1})
         } 
         else {
+
+            //
+            //println!("{}", self.to_string());
+            //
             let mut ann_out : Vec<Vec<f64>> = Vec::new();
             for (x, _) in dataset.sample_iter(){
                 match x.as_slice(){
@@ -261,6 +268,10 @@ impl<'a> Evonet<'a> {
     #[allow(dead_code)]
     pub fn load(_file : &str)-> Result<Self, String>{
         Err(String::from("not implemented yet !!"))
+    }
+
+    pub fn to_string(&self)-> String {
+        format!("[Weights, Biases]: {:?}", self.neuralnetwork)  
     }
 
 }

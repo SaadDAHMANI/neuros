@@ -55,6 +55,8 @@ pub fn ann_sin_test(){
 
             println!("Training results RMSE : {:?}", training_result.best_fitness);
 
+            let learning_out = ann.compute_outputs(&train_set); 
+
            /* let learning_out = ann.compute_outputs(&train_set); 
 
              match learning_out {
