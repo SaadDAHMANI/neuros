@@ -39,22 +39,25 @@ pub fn ann_sin_test(){
             let mut ann : Evonet = Evonet::empty();
             ann.add_layer(Layer::new(records.dim().1, Activations::Sigmoid));
             ann.add_layer(Layer::new(3, Activations::Sigmoid));
-            ann.add_layer(Layer::new(3, Activations::Sigmoid));
+            //ann.add_layer(Layer::new(3, Activations::Sigmoid));
             ann.add_layer(Layer::new(targets.dim().1, Activations::Linear));
 
             //let params : EoSettings = EoSettings::new(50, 1000, -10.0, 10.0, 2.0, 1.0, 0.5);
             //let train_algo : TrainingAlgo = TrainingAlgo::EO(params);
 
-            let params : GoSettings = GoSettings::default();
+            //let params : GoSettings = GoSettings::default();
+
+            let params : GoSettings = GoSettings::new(10, 2, -5.0, 5.0);
+            
             let train_algo : TrainingAlgo = TrainingAlgo::GO(params);
 
             let training_result = ann.do_learning(& train_algo, &train_set);
 
-            println!("Training results : {:?}", training_result.best_fitness);
+            println!("Training results RMSE : {:?}", training_result.best_fitness);
 
-            let learning_out = ann.compute_outputs(&train_set); 
+           /* let learning_out = ann.compute_outputs(&train_set); 
 
-            match learning_out {
+             match learning_out {
                 Err(eror)=> println!("No result, due to : {}", eror),
                 Ok(ann_out)=>{
                     
@@ -63,8 +66,8 @@ pub fn ann_sin_test(){
                     } 
                 }
             };
-
-            let testing_out = ann.compute_outputs(&test_set);
+ */
+          /*   let testing_out = ann.compute_outputs(&test_set);
 
             match testing_out {
                 Err(eror) => println!("No result, due to : {}", eror),
@@ -74,7 +77,7 @@ pub fn ann_sin_test(){
                         println!("Testing -> computed: {:.3}, expected : {:?}", computed[0], expected);
                     } 
                 }
-            };
+            }; */
         },
     }
 

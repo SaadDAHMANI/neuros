@@ -20,11 +20,11 @@ use crate::{cv_example::ann_sin_test_cross_valid, sin_example::ann_sin_test};
 fn main() {
     println!("Hello, NEUROS!");
     
-    ann_sin_test_cross_valid();
+    //ann_sin_test_cross_valid();
     
     //ann_xor_test();
 
-     //ann_sin_test();
+    ann_sin_test();
 
     //ann_cos_test();
 }

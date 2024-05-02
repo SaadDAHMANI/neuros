@@ -262,6 +262,8 @@ impl<'a> Problem for Evonet<'a> {
                 let sample_count = learning_set.targets.dim().0 as f64 ;
                 let target_features = learning_set.targets.dim().1;
 
+                //println!("(i, j) = ({}, {})", sample_count, target_features);
+
                  //1. Update weights and biases :
                 self.neuralnetwork.update_weights_biases(genome);
 
@@ -273,10 +275,13 @@ impl<'a> Problem for Evonet<'a> {
                         Some(x_vector)=> {
                             let computed =  self.neuralnetwork.feed_forward(x_vector);
                                 match y.as_slice() {
+                                
                                     None => {},
-                                    Some(y_vector)=> {                                  
+                                    Some(y_vector)=> {             
+                                        //println!("(x, y): ({:?}, {:?})", x_vector, y_vector);
+
                                         for j in 0..target_features{
-                                            errors[j] += (y_vector[j] - computed[j]).powi(2);
+                                            errors[j] += f64::powi(y_vector[j] - computed[j], 2);
                                         }                            
                                    },
                             };
