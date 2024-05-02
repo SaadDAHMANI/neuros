@@ -155,7 +155,7 @@ impl<'a> Evonet<'a> {
     pub fn do_learning(&mut self, train_algo : &TrainingAlgo, train_dataset : &'a Dataset<f64, f64, Ix2>)-> OptimizationResult {
         self.learning_set = Some(train_dataset);
         let wb = self.neuralnetwork.get_weights_biases_count();
-                
+
         let result =  match train_algo {
             // Use EO as trainer
             &TrainingAlgo::EO(stng) => {
@@ -167,7 +167,7 @@ impl<'a> Evonet<'a> {
                     Err(eror) => OptimizationResult::get_none(eror),
                     Ok(settings) => {
                         let mut algo = EO::<Evonet>::new(&settings, self);
-                        algo.run()     
+                        algo.run()
                     },
                 }          
             },
@@ -197,7 +197,18 @@ impl<'a> Evonet<'a> {
                  
             },
         };       
-                     
+ 
+        match &result.best_genome {
+            None => { 
+                let zeros_vec = vec![0.0; wb]; 
+                self.neuralnetwork.update_weights_biases(& zeros_vec);
+                
+            },
+            Some(vec_wb)=> {
+                self.neuralnetwork.update_weights_biases(&vec_wb.genes);
+            },
+        };
+                                                                        
         //
         result
 
