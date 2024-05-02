@@ -196,12 +196,13 @@ impl<'a> Evonet<'a> {
                 algo.run()
                  
             },
-        };       
- 
+        };   
+
+        // Set the best paramaters for the ANN.
         match &result.best_genome {
             None => { 
-                let zeros_vec = vec![0.0; wb]; 
-                self.neuralnetwork.update_weights_biases(& zeros_vec);
+                //let zeros_vec = vec![0.0; wb]; /
+                self.neuralnetwork.update_weights_biases(&vec![0.0; wb]);
                 
             },
             Some(vec_wb)=> {
