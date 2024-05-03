@@ -1,6 +1,6 @@
 # Neuros
 
-[Neuros](https://github.com/SaadDAHMANI/neuros) crate is under active development.s
+[Neuros](https://github.com/SaadDAHMANI/neuros) crate is under active development.
 
 <!-- [Neuros](https://github.com/SaadDAHMANI/neuros) is a simple [Rust](https://www.rust-lang.org/) package for Artificial (Feedforward) Neural Networks (ANNs) processing. [Neuros](https://github.com/SaadDAHMANI/neuros) uses [Sefar](https://crates.io/crates/sefar) crate to perform ANNs training. 
 
